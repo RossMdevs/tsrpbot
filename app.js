@@ -145,11 +145,11 @@ async function handleChangeRoleCommand(message, args) {
   try {
     if (action === 'add') {
       await user.roles.add(role);
-      message.reply(`Role ${role.name} successfully added to ${user.user.tag}.`);
+      message.reply(`I've added **${role.name}**  to **${user.user.tag}**.`);
       console.log(`Role ${role.name} added to ${user.user.tag} by ${message.author.tag}.`);
     } else if (action === 'remove') {
       await user.roles.remove(role);
-      message.reply(`Role ${role.name} successfully removed from ${user.user.tag}.`);
+      message.reply(`I've removed **${role.name}** from **${user.user.tag}**.`);
       console.log(`Role ${role.name} removed from ${user.user.tag} by ${message.author.tag}.`);
     }
   } catch (error) {
