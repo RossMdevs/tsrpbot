@@ -1,7 +1,14 @@
+// Import SQLite database connection
+const db = require('warns_bans.db'); // Adjust the path as needed
+
 module.exports = {
   name: 'warn',
   description: 'Warns a user.',
-  async execute(message, args, db) {
+  async execute(message, args) {
+    if (!message.member.hasPermission('MANAGE_MESSAGES')) {
+      return message.reply('You do not have permission to use this command.');
+    }
+
     const user_id = args[0];
     const moderator_id = message.author.id;
     const reason = args.slice(1).join(' ');
@@ -18,7 +25,3 @@ module.exports = {
     });
   },
 };
-
-
-// Log a message to indicate that the help.js file has been read
-console.log("warn.js started");
