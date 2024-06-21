@@ -6,6 +6,8 @@ module.exports = {
   name: 'add',
   description: 'Adds a user to IRS.',
   async execute(message, args) {
+    console.log('Executing !add command.');
+
     if (args.length !== 2) {
       message.reply('**No!** This command requires **exactly** two arguments: ``username password``.');
       return;
@@ -23,8 +25,13 @@ module.exports = {
       }
 
       // Send a response immediately after executing the command
-      message.channel.send(`I've run the command. I added user "${username}" to the IRS.`);
-      await message.delete(); // Delete the command message after replying
+      try {
+        await message.channel.send(`I've run the command. I added user "${username}" to the IRS.`);
+        await message.delete(); // Delete the command message after replying
+        console.log(`Command response sent to channel ${message.channel.id}.`);
+      } catch (err) {
+        console.error('Error sending message to channel:', err);
+      }
 
       // Log a console message with the user's ID
       console.log(`IRS Adder tool ran by ${message.author.tag} (${message.author.id})`);
