@@ -15,7 +15,7 @@ const allowedUserIds = ['760626163147341844'];
 
 // Define the role IDs for permission to use commands
 const roleForRequestID = 'ReplaceWithRoleID'; // Role ID that can use !request
-const rolesForChangeRole = ['1176929445441982465',]; // Array of role IDs that can use !changerole
+const rolesForChangeRole = ['1176929445441982465']; // Array of role IDs that can use !changerole
 
 // Define the channel ID where requests and reports will be posted
 const requestChannelId = '1253717988675424296';
