@@ -21,7 +21,7 @@ const requestChannelId = '1253717988675424296';
 
 client.once('ready', () => {
   console.log('TSRP Tool has started.');
-  console.log("Requests Logger: ${requestChannelId}");
+  console.log("Requests Logger: ${requestChannelId} ");
 });
 
 client.on('messageCreate', async message => {
@@ -83,7 +83,7 @@ client.on('messageCreate', async message => {
     // Check if the author has any of the allowed roles
     const member = message.guild.members.cache.get(message.author.id);
     if (!member.roles.cache.some(role => allowedRoles.includes(role.id))) {
-      console.log(`Unauthorized user attempted !request command: ${message.author.tag}:(${message.author.id})`);
+      console.log(`Unauthorized user attempted !request command: ${message.author.tag}:${message.author.id}`);
       message.reply('**No!**: You do not have permission to use this command.');
       return;
     }
@@ -105,9 +105,9 @@ client.on('messageCreate', async message => {
     }
 
     // Send the request to the request channel
-    requestChannel.send(`Request from ${message.author.tag} (${message.author.id}): ${requestContent}`);
+    requestChannel.send(`Request from ${message.author.tag} ${message.author.id}: ${requestContent}`);
     message.reply('Your request has been submitted.');
-    console.log("!request was executed by ${message.author.tag}:(${message.author.id})")
+    console.log("!request was executed by ${message.author.tag} ${message.author.id}")
   }
 });
 
