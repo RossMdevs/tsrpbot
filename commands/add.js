@@ -1,5 +1,3 @@
-const { exec } = require('child_process');
-
 module.exports = {
   name: 'add',
   description: 'Adds a user to IRS automatically.',
