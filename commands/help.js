@@ -2,7 +2,7 @@ module.exports = {
   name: 'help',
   description: 'Displays available commands and their usage.',
   execute(message, args) {
-    consol.log("testing")
+    console.log("testing")
     // Help command content
     const helpMessage = `Available commands:
     ○ **!request <details>** - Streamlines a request to the Board of Directors (Staff+)
