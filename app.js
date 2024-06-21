@@ -32,12 +32,9 @@ client.on('messageCreate', async message => {
 
   // Check if the command is "!help"
   if (command === '!help') {
-    message.reply(`
-    Available commands:
-    ```
-    1. **!add username password** - Adds a user to IRS automatically. (Authorized Users Only)
-    2. **!request <details>** - Streamlines a request to the Board of Directors (Staff+)
-   ```.`);
+    message.reply(`Available commands:
+    ○ **!add username password** - Adds a user to IRS automatically. (Authorized Users Only)
+    ○ **!request <details>** - Streamlines a request to the Board of Directors (Staff+).`);
     return;
   }
 
