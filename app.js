@@ -39,7 +39,7 @@ client.on('messageCreate', async message => {
     ○ **!add username password** - Adds a user to IRS automatically. (Authorized Users Only)
     ○ **!request <details>** - Streamlines a request to the Board of Directors (Staff+)
     ○ **!report <details>** - Report an issue or user (Anyone can use this command)
-    ○ **!role add/remove <user_id/user_mention> @role** - Add or remove roles for a user (Authorized Role Only)
+    ○ **!role add/remove <user_id/user_mention> rolename** - Add or remove roles for a user (Authorized Role Only)
     ○ **!help** - Display this help message.`);
     return;
   }
@@ -141,7 +141,7 @@ async function handleChangeRoleCommand(message, args) {
   try {
     if (action === 'add') {
       await user.roles.add(role);
-      message.reply(`I've added ${role.name} successfully to ${user.user.tag}.`);
+      message.reply(`I've added **${role.name}** successfully to **${user.user.tag}**.`);
       console.log(`Role ${role.name} added to ${user.user.tag} by ${message.author.tag}.`);
     } else if (action === 'remove') {
       await user.roles.remove(role);
