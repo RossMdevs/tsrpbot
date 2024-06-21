@@ -13,9 +13,9 @@ const client = new Client({
 // Replace with your allowed user IDs
 const allowedUserIds = ['760626163147341844'];
 
-// Define the role IDs for permission to use !request and !changerole
+// Define the role IDs for permission to use !request and !role
 const roleForRequestID = '1176929445441982465'; // Role ID that can use !request
-const rolesForChangeRole = ['1176929445441982465']; // Array of role IDs that can use !changerole
+const rolesForChangeRole = ['1176929445441982465']; // Array of role IDs that can use !role
 
 // Define the channel ID where requests and reports will be posted
 const requestChannelId = '1253717988675424296';
@@ -58,7 +58,7 @@ client.on('messageCreate', async message => {
     handleRequestCommand(message, args);
   }
 
-  // Handle !role command (formerly !changerole)
+  // Handle !role command
   if (command === '!role') {
     handleChangeRoleCommand(message, args);
   }
@@ -96,7 +96,7 @@ async function handleRequestCommand(message, args) {
 }
 
 async function handleChangeRoleCommand(message, args) {
-  // Check if the author has any of the allowed roles for !role (changerole)
+  // Check if the author has any of the allowed roles for !role
   const member = message.guild.members.cache.get(message.author.id);
   if (!hasPermissionForChangeRole(member)) {
     console.log(`Unauthorized role change attempt by: ${message.author.tag} (${message.author.id})`);
@@ -111,7 +111,7 @@ async function handleChangeRoleCommand(message, args) {
   }
 
   const action = args[0].toLowerCase(); // add or remove
-  let userIdentifier = args[1]; // User ID, mention, or username
+  let userIdentifier = args[1]; // User ID, mention, or partial username
   const roleName = args.slice(2).join(' ').toLowerCase(); // Role name to search for
 
   // Check if the userIdentifier is a mention (strip off the "<@!>" if present)
@@ -122,11 +122,15 @@ async function handleChangeRoleCommand(message, args) {
     }
   }
 
-  // Find the user by ID, mention, or username in the guild
+  // Find the user by ID or mention in the guild
   let user = message.guild.members.cache.get(userIdentifier);
+
+  // If user is not found by ID or mention, attempt to find by partial username
   if (!user) {
-    // Attempt to find by username
-    user = message.guild.members.cache.find(member => member.user.username.toLowerCase() === userIdentifier.toLowerCase());
+    const usernameFilter = userIdentifier.toLowerCase();
+    user = message.guild.members.cache.find(member =>
+      member.user.username.toLowerCase().includes(usernameFilter)
+    );
   }
 
   if (!user) {
@@ -144,13 +148,21 @@ async function handleChangeRoleCommand(message, args) {
 
   try {
     if (action === 'add') {
-      await user.roles.add(role);
-      message.reply(`I've added **${role.name}**  to **${user.user.tag}**.`);
-      console.log(`Role ${role.name} added to ${user.user.tag} by ${message.author.tag}.`);
+      if (user.roles.cache.has(role.id)) {
+        message.reply(`**${user.user.tag}** already has the role **${role.name}**.`);
+      } else {
+        await user.roles.add(role);
+        message.reply(`Role ${role.name} successfully added to ${user.user.tag}.`);
+        console.log(`Role ${role.name} added to ${user.user.tag} by ${message.author.tag}.`);
+      }
     } else if (action === 'remove') {
-      await user.roles.remove(role);
-      message.reply(`I've removed **${role.name}** from **${user.user.tag}**.`);
-      console.log(`Role ${role.name} removed from ${user.user.tag} by ${message.author.tag}.`);
+      if (!user.roles.cache.has(role.id)) {
+        message.reply(`**${user.user.tag}** does not have the role **${role.name}**.`);
+      } else {
+        await user.roles.remove(role);
+        message.reply(`Role ${role.name} successfully removed from ${user.user.tag}.`);
+        console.log(`Role ${role.name} removed from ${user.user.tag} by ${message.author.tag}.`);
+      }
     }
   } catch (error) {
     console.error('Error adding/removing role:', error);
