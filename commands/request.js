@@ -38,4 +38,8 @@ module.exports = {
       console.log(`Request executed by ${message.author.tag} (${message.author.id}): ${requestContent}`);
     },
   };
+
+// Log a message to indicate that the help.js file has been read
+console.log("request.js started");
+
   
