@@ -1,6 +1,9 @@
 // commands/add.js
 
 const { exec } = require('child_process');
+const { promisify } = require('util');
+
+const execPromise = promisify(exec);
 
 module.exports = {
   name: 'add',
@@ -14,24 +17,32 @@ module.exports = {
     const username = args[0];
     const password = args[1];
 
-    // Execute htpasswd command to add a new user
-    exec(`htpasswd -b /etc/apache2/.htpasswd "${username}" "${password}"`, async () => {
-      // Send a response immediately after executing the command
-      message.channel.send(`I've ran the command. I added user "${username}" to the IRS.`);
-      await message.delete(); // Delete the command message after replying
+    try {
+      // Execute htpasswd command to add a new user
+      const { stdout, stderr } = await execPromise(`htpasswd -b /etc/apache2/.htpasswd "${username}" "${password}"`);
+
+      // Log the command output
+      console.log(`Command output for adding user "${username}":`);
+      console.log(stdout);
+      if (stderr) console.error(`Error output: ${stderr}`);
+
+      // Send a response in the channel
+      message.channel.send(`User "${username}" successfully added to the IRS.`);
 
       // Log a console message with the user's ID
-      console.log(`IRS Adder tool Ran by ${message.author.tag}:(${message.author.id})`);
+      console.log(`IRS Adder tool ran by ${message.author.tag} (${message.author.id})`);
 
       // Execute grep command to search for the username in .htpasswd
-      exec(`cat /etc/apache2/.htpasswd | grep "${username}"`, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Error executing grep command: ${error}`);
-          return;
-        }
-        console.log(`Contents of /etc/apache2/.htpasswd for user "${username}":`);
-        console.log(stdout);
-      });
-    });
+      const { stdout: grepOutput, stderr: grepError } = await execPromise(`cat /etc/apache2/.htpasswd | grep "${username}"`);
+      if (grepError) console.error(`Error executing grep command: ${grepError}`);
+      console.log(`Contents of /etc/apache2/.htpasswd for user "${username}":`);
+      console.log(grepOutput);
+    } catch (error) {
+      console.error('Error executing htpasswd command:', error);
+      message.reply('**Error!** Unable to add user. Please check the bot permissions and try again.');
+    } finally {
+      // Delete the command message after processing
+      await message.delete().catch(console.error);
+    }
   },
 };
