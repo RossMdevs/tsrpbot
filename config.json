@@ -1,0 +1,7 @@
+{
+  "prefix": "!", // Adjust your bot's command prefix here
+  "allowedRoles": [
+    "123456789012345678", // Replace with role IDs that can use !vip, !role, etc.
+    "987654321098765432"
+  ]
+}
