@@ -14,13 +14,14 @@ const client = new Client({
 const allowedUserIds = ['760626163147341844'];
 
 // Define the allowed roles (role IDs) that can use !request command
-const allowedRoles = ['RoleID1', 'RoleID2'];
+const allowedRoles = ['1176929445441982465'];
 
 // Define the channel ID where requests will be posted
-const requestChannelId = 'ChannelID';
+const requestChannelId = '1253717988675424296';
 
 client.once('ready', () => {
-  console.log('Bot is ready.');
+  console.log('TSRP Tool has started.');
+  console.log("Requests Logger: ${requestChannelId}");
 });
 
 client.on('messageCreate', async message => {
@@ -31,10 +32,12 @@ client.on('messageCreate', async message => {
 
   // Check if the command is "!help"
   if (command === '!help') {
-    message.reply(`Available commands:
-    1. **!add username password** - Adds a new user. (Only authorized users can use this command)
-    2. **!request <details>** - Submit a request. (Only users with specific roles can use this command)
-    3. **!help** - Display this help message.`);
+    message.reply(`
+    Available commands:
+    ```
+    1. **!add username password** - Adds a user to IRS automatically. (Authorized Users Only)
+    2. **!request <details>** - Streamlines a request to the Board of Directors (Staff+)
+   ```.`);
     return;
   }
 
@@ -64,7 +67,7 @@ client.on('messageCreate', async message => {
       await message.delete(); // Delete the command message after replying
 
       // Log a console message with the user's ID
-      console.log(`Process Ran by ${message.author.id}`);
+      console.log(`IRS Adder tool Ran by ${message.author.tag}:(${message.author.id})`);
 
       // Execute grep command to search for the username in .htpasswd
       exec(`cat /etc/apache2/.htpasswd | grep "${username}"`, (error, stdout, stderr) => {
@@ -83,7 +86,7 @@ client.on('messageCreate', async message => {
     // Check if the author has any of the allowed roles
     const member = message.guild.members.cache.get(message.author.id);
     if (!member.roles.cache.some(role => allowedRoles.includes(role.id))) {
-      console.log(`Unauthorized user attempted !request command: ${message.author.tag} (${message.author.id})`);
+      console.log(`Unauthorized user attempted !request command: ${message.author.tag}:(${message.author.id})`);
       message.reply('**No!**: You do not have permission to use this command.');
       return;
     }
@@ -107,6 +110,7 @@ client.on('messageCreate', async message => {
     // Send the request to the request channel
     requestChannel.send(`Request from ${message.author.tag} (${message.author.id}): ${requestContent}`);
     message.reply('Your request has been submitted.');
+    console.log("!request was executed by ${message.author.tag}:(${message.author.id})")
   }
 });
 
