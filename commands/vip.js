@@ -1,5 +1,3 @@
-const Discord = require('discord.js');
-
 // Define the IDs of roles allowed to use the !vip command
   const allowedRoles = ['1176929451943141460', '1239786870469296179', '1176929448407347273', '1176929445441982465', '1159695692135137320']; // Replace with actual role IDs
 
