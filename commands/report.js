@@ -35,4 +35,6 @@ module.exports = {
       }
     },
   };
-  
+
+// Log a message to indicate that the help.js file has been read
+console.log("report.js started");
