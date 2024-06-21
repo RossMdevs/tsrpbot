@@ -149,18 +149,18 @@ async function handleChangeRoleCommand(message, args) {
   try {
     if (action === 'add') {
       if (user.roles.cache.has(role.id)) {
-        message.reply(`**${user.user.tag}** already has the role**${role.name}**.`);
+        message.reply(`**${user.user.tag}** already has the role **${role.name}**.`);
       } else {
         await user.roles.add(role);
-        message.reply(`Role ${role.name} successfully added to ${user.user.tag}.`);
-        console.log(`Role **${role.name}** added to ${user.user.tag} by**${message.author.tag}**.`);
+        message.reply(`Role **${role.name}** successfully added to **${user.user.tag}**.`);
+        console.log(`Role **${role.name}** added to **${user.user.tag}** by **${message.author.tag}**.`);
       }
     } else if (action === 'remove') {
       if (!user.roles.cache.has(role.id)) {
-        message.reply(`**${user.user.tag}** does not have the role**${role.name}**.`);
+        message.reply(`**${user.user.tag}** does not have the role **${role.name}**.`);
       } else {
         await user.roles.remove(role);
-        message.reply(`Role **${role.name}** successfully removed from**${user.user.tag}**.`);
+        message.reply(`Role **${role.name}** successfully removed from **${user.user.tag}**.`);
         console.log(`Role ${role.name} removed from ${user.user.tag} by ${message.author.tag}.`);
       }
     }
