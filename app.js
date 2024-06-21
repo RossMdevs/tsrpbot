@@ -18,7 +18,7 @@ const allowedRoles = ['1176929445441982465'];
 
 // Define the channel ID where requests and reports will be posted
 const requestChannelId = '1253717988675424296';
-const reportChannelId = 'ReportChannelID'; // Define the report channel ID
+const reportChannelId = '1253717988675424296'; // Define the report channel ID
 
 client.once('ready', () => {
   console.log('TSRP Tool has started.');
