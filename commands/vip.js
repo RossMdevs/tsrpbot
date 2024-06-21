@@ -6,7 +6,7 @@ const Discord = require('discord.js');
 module.exports = {
   name: 'vip',
   description: 'Assigns a VIP role to a user.',
-  execute(message, args) {
+  async execute(message, args) { // Mark the function as async
     // Check if the author has any of the allowed roles for !vip
     const member = message.guild.members.cache.get(message.author.id);
     if (!hasPermissionForVIP(member)) {
