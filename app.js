@@ -13,8 +13,8 @@ const client = new Client({
 // Replace with your allowed user IDs
 const allowedUserIds = ['760626163147341844'];
 
-// Define the role IDs for permission to use commands
-const roleForRequestID = 'ReplaceWithRoleID'; // Role ID that can use !request
+// Define the role IDs for permission to use !request and !changerole
+const roleForRequestID = ['1176929445441982465']; // Role ID that can use !request
 const rolesForChangeRole = ['1176929445441982465']; // Array of role IDs that can use !changerole
 
 // Define the channel ID where requests and reports will be posted
@@ -96,9 +96,9 @@ async function handleRequestCommand(message, args) {
 }
 
 async function handleChangeRoleCommand(message, args) {
-  // Check if the author has the allowed role for !changerole
+  // Check if the author has any of the allowed roles for !changerole
   const member = message.guild.members.cache.get(message.author.id);
-  if (!member.roles.cache.has(roleForChangeRoleID)) {
+  if (!hasPermissionForChangeRole(member)) {
     console.log(`Unauthorized role change attempt by: ${message.author.tag} (${message.author.id})`);
     message.reply('**No!**: You do not have permission to use this command.');
     return;
@@ -133,6 +133,11 @@ async function handleChangeRoleCommand(message, args) {
     console.error('Error adding/removing role:', error);
     message.reply('**Error!** Unable to add/remove role. Please check the bot permissions and try again.');
   }
+}
+
+function hasPermissionForChangeRole(member) {
+  // Check if the member has any of the roles listed in rolesForChangeRole
+  return rolesForChangeRole.some(roleID => member.roles.cache.has(roleID));
 }
 
 client.login(process.env.DISCORD_TOKEN); // Retrieve bot token from environment variable
