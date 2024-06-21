@@ -14,7 +14,7 @@ const client = new Client({
 const allowedUserIds = ['760626163147341844'];
 
 // Define the role IDs for permission to use !request and !changerole
-const roleForRequestID = ['1176929445441982465']; // Role ID that can use !request
+const roleForRequestID = '1176929445441982465'; // Role ID that can use !request
 const rolesForChangeRole = ['1176929445441982465']; // Array of role IDs that can use !changerole
 
 // Define the channel ID where requests and reports will be posted
@@ -39,7 +39,7 @@ client.on('messageCreate', async message => {
     ○ **!add username password** - Adds a user to IRS automatically. (Authorized Users Only)
     ○ **!request <details>** - Streamlines a request to the Board of Directors (Staff+)
     ○ **!report <details>** - Report an issue or user (Anyone can use this command)
-    ○ **!role add/remove <user_id/user_mention> rolename** - Add or remove roles for a user (Authorized Role Only)
+    ○ **!role add/remove <user_id/user_mention/username> @role** - Add or remove roles for a user (Authorized Role Only)
     ○ **!help** - Display this help message.`);
     return;
   }
@@ -58,7 +58,7 @@ client.on('messageCreate', async message => {
     handleRequestCommand(message, args);
   }
 
-  // Handle !changerole command
+  // Handle !role command (formerly !changerole)
   if (command === '!role') {
     handleChangeRoleCommand(message, args);
   }
@@ -96,7 +96,7 @@ async function handleRequestCommand(message, args) {
 }
 
 async function handleChangeRoleCommand(message, args) {
-  // Check if the author has any of the allowed roles for !changerole
+  // Check if the author has any of the allowed roles for !role (changerole)
   const member = message.guild.members.cache.get(message.author.id);
   if (!hasPermissionForChangeRole(member)) {
     console.log(`Unauthorized role change attempt by: ${message.author.tag} (${message.author.id})`);
@@ -105,28 +105,32 @@ async function handleChangeRoleCommand(message, args) {
   }
 
   // Ensure the command has the right format
-  if (args.length < 2 || !['add', 'remove'].includes(args[0].toLowerCase())) {
-    message.reply('**No!** This command requires at least two arguments: ``add/remove <user_id/user_mention> role_name``.');
+  if (args.length < 3 || !['add', 'remove'].includes(args[0].toLowerCase())) {
+    message.reply('**No!** This command requires at least three arguments: ``add/remove <user_id/user_mention/username> @role``.');
     return;
   }
 
   const action = args[0].toLowerCase(); // add or remove
-  let userId = args[1]; // User ID or mention
+  let userIdentifier = args[1]; // User ID, mention, or username
   const roleName = args.slice(2).join(' ').toLowerCase(); // Role name to search for
 
-  // Check if the userId is a mention (strip off the "<@!>" if present)
-  if (userId.startsWith('<@') && userId.endsWith('>')) {
-    userId = userId.slice(3, -1); // Remove "<@!>" or "<@" and ">"
-    if (userId.startsWith('!')) {
-      userId = userId.slice(1); // Remove "!" if present
+  // Check if the userIdentifier is a mention (strip off the "<@!>" if present)
+  if (userIdentifier.startsWith('<@') && userIdentifier.endsWith('>')) {
+    userIdentifier = userIdentifier.slice(3, -1); // Remove "<@!>" or "<@" and ">"
+    if (userIdentifier.startsWith('!')) {
+      userIdentifier = userIdentifier.slice(1); // Remove "!" if present
     }
   }
 
-  // Find the user by ID in the guild
-  const user = message.guild.members.cache.get(userId);
+  // Find the user by ID, mention, or username in the guild
+  let user = message.guild.members.cache.get(userIdentifier);
+  if (!user) {
+    // Attempt to find by username
+    user = message.guild.members.cache.find(member => member.user.username.toLowerCase() === userIdentifier.toLowerCase());
+  }
 
   if (!user) {
-    message.reply(`**No!** User with ID ${userId} not found.`);
+    message.reply(`**No!** Unable to find user "${userIdentifier}".`);
     return;
   }
 
@@ -134,18 +138,18 @@ async function handleChangeRoleCommand(message, args) {
   const role = message.guild.roles.cache.find(role => role.name.toLowerCase() === roleName);
 
   if (!role) {
-    message.reply(`**No!** I can't find find "${roleName}".`);
+    message.reply(`**No!** Role "${roleName}" not found.`);
     return;
   }
 
   try {
     if (action === 'add') {
       await user.roles.add(role);
-      message.reply(`I've added **${role.name}** successfully to **${user.user.tag}**.`);
+      message.reply(`Role ${role.name} successfully added to ${user.user.tag}.`);
       console.log(`Role ${role.name} added to ${user.user.tag} by ${message.author.tag}.`);
     } else if (action === 'remove') {
       await user.roles.remove(role);
-      message.reply(`I've removed ${role.name} successfully from ${user.user.tag}.`);
+      message.reply(`Role ${role.name} successfully removed from ${user.user.tag}.`);
       console.log(`Role ${role.name} removed from ${user.user.tag} by ${message.author.tag}.`);
     }
   } catch (error) {
