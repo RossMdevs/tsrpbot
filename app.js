@@ -137,11 +137,14 @@ client.on('messageCreate', async message => {
       return;
     }
 
+    // Get the ban reason from the command
+    const banReason = args.slice(1).join(' ');
+
     // Ban the user
-    await userToBan.ban({ reason: `Banned by ${message.author.tag} (${message.author.id})` })
+    await userToBan.ban({ reason: `Banned by ${message.author.tag} (${message.author.id}) for ${banReason}` })
       .then(() => {
         message.reply(`Successfully banned ${userToBan.user.tag} (${userToBan.user.id}) from the server.`);
-        console.log(`User ${userToBan.user.tag} (${userToBan.user.id}) banned by ${message.author.tag} (${message.author.id})`);
+        console.log(`User ${userToBan.user.tag} (${userToBan.user.id}) banned by ${message.author.tag} (${message.author.id}) for ${banReason}`);
       })
       .catch(error => {
         console.error(`Error banning user ${userToBan.user.tag} (${userToBan.user.id}):`, error);
@@ -166,17 +169,29 @@ client.on('messageCreate', async message => {
       return;
     }
 
+    // Get the unban reason from the command
+    const unbanReason = args.slice(1).join(' ');
+
     // Unban the user
-    message.guild.members.unban(userID)
+    message.guild.members.unban(userID, `Unbanned by ${message.author.tag} (${message.author.id}) for ${unbanReason}`)
       .then(() => {
         message.reply(`Successfully unbanned user with ID ${userID} from the server.`);
-        console.log(`User with ID ${userID} unbanned by ${message.author.tag} (${message.author.id})`);
+        console.log(`User with ID ${userID} unbanned by ${message.author.tag} (${message.author.id}) for ${unbanReason}`);
       })
       .catch(error => {
         console.error(`Error unbanning user with ID ${userID}:`, error);
         message.reply(`Failed to unban user with ID ${userID}. Please check my permissions and try again.`);
       });
   }
-});
 
-client.login(process.env.DISCORD_TOKEN); // Retrieve bot token from environment variable
+  // Check if the command is "!timeout"
+  if (command === '!timeout') {
+    // Check if the author has any of the moderation permissions
+    const member = message.guild.members.cache.get(message.author.id);
+    if (!member.roles.cache.some(role => moderationPerms.includes(role.id))) {
+      console.log(`Unauthorized user attempted !timeout command: ${message.author.tag}:${message.author.id}`);
+      message.reply('**No!**: You do not have permission to use this command.');
+      return;
+    }
+
+
