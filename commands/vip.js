@@ -1,43 +1,80 @@
-// Define the IDs of roles allowed to use the !vip command
-  const allowedRoles = ['1176929451943141460', '1239786870469296179', '1176929448407347273', '1176929445441982465', '1159695692135137320']; // Replace with actual role IDs
+// commands/vip.js
+
+const { allowedRoles } = require('../config.json'); // Replace with your actual config path
+const Discord = require('discord.js');
 
 module.exports = {
   name: 'vip',
-  description: 'Assigns VIP role to a user.',
+  description: 'Assigns a VIP role to a user.',
   execute(message, args) {
-    // Check if the user has any of the allowed roles
-    if (!message.member.roles.cache.some(role => allowedRoles.includes(role.id))) {
-      return message.reply('You do not have permission to use this command.');
+    // Check if the author has any of the allowed roles for !vip
+    const member = message.guild.members.cache.get(message.author.id);
+    if (!hasPermissionForVIP(member)) {
+      console.log(`Unauthorized VIP role assignment attempt by: ${message.author.tag} (${message.author.id})`);
+      message.reply('**No!**: You do not have permission to use this command.');
+      return;
     }
 
-    // Determine the user to assign VIP
-    let userToVIP = message.mentions.members.first() ||
-                    message.guild.members.cache.get(args[0]) ||
-                    message.guild.members.cache.find(member =>
-                      member.user.username.toLowerCase().includes(args.join(' ').toLowerCase()) ||
-                      (member.nickname && member.nickname.toLowerCase().includes(args.join(' ').toLowerCase()))
-                    );
-
-    // If user still not found, respond with an error
-    if (!userToVIP) {
-      return message.reply('Unable to find the user. Please mention a user, provide their ID, or use their username/nickname.');
+    // Ensure the command has the right format
+    if (args.length < 1) {
+      message.reply('**No!** This command requires at least one argument: `<user_id/user_mention/username>`.');
+      return;
     }
 
-    // Add VIP role logic here
-    const vipRole = message.guild.roles.cache.find(role => role.name === 'VIP'); // Replace 'VIP' with actual VIP role name
+    let userIdentifier = args[0]; // User ID, mention, or partial username
+
+    // Check if the userIdentifier is a mention (strip off the "<@!>" if present)
+    if (userIdentifier.startsWith('<@') && userIdentifier.endsWith('>')) {
+      userIdentifier = userIdentifier.slice(3, -1); // Remove "<@!>" or "<@" and ">"
+      if (userIdentifier.startsWith('!')) {
+        userIdentifier = userIdentifier.slice(1); // Remove "!" if present
+      }
+    }
+
+    // Find the user by ID or mention in the guild
+    let user = message.guild.members.cache.get(userIdentifier);
+
+    // If user is not found by ID or mention, attempt to find by partial username
+    if (!user) {
+      const usernameFilter = userIdentifier.toLowerCase();
+      user = message.guild.members.cache.find(member =>
+        member.user.username.toLowerCase().includes(usernameFilter)
+      );
+    }
+
+    if (!user) {
+      message.reply(`**No!** Unable to find user "${userIdentifier}".`);
+      return;
+    }
+
+    // Find the VIP role in the guild
+    const vipRole = message.guild.roles.cache.find(role => role.name === 'VIP'); // Replace 'VIP' with your actual VIP role name
 
     if (!vipRole) {
-      return message.reply('The "VIP" role does not exist. Please create it.');
+      message.reply('**No!** The "VIP" role does not exist. Please create it.');
+      return;
     }
 
     try {
       // Add the VIP role to the user
-      userToVIP.roles.add(vipRole);
-      // Send a success message
-      message.channel.send(`User ${userToVIP} has been assigned the VIP role.`);
+      if (user.roles.cache.has(vipRole.id)) {
+        message.reply(`**${user.user.tag}** already has the VIP role.`);
+      } else {
+        await user.roles.add(vipRole);
+        message.reply(`VIP role successfully added to **${user.user.tag}**.`);
+        console.log(`VIP role added to **${user.user.tag}** by **${message.author.tag}**.`);
+      }
     } catch (error) {
-      console.error('Error assigning VIP role:', error);
-      message.reply('Failed to assign the VIP role. Please try again later.');
+      console.error('Error adding VIP role:', error);
+      message.reply('**Error!** Unable to add VIP role. Please check the bot permissions and try again.');
     }
   },
 };
+
+function hasPermissionForVIP(member) {
+  // Check if the member has any of the roles listed in allowedRoles for VIP role assignment
+  return allowedRoles.some(roleID => member.roles.cache.has(roleID));
+}
+
+// Log a message to indicate that the role.js file has been read
+console.log("vip.js started");
