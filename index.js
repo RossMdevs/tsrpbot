@@ -1,3 +1,5 @@
+// index.js
+
 const { Client, GatewayIntentBits } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
@@ -36,8 +38,7 @@ client.on('messageCreate', async (message) => {
   const command = client.commands.get(commandName);
 
   try {
-    // Pass db instance if command requires it
-    await command.execute(message, args, db);
+    await command.execute(message, args); // Execute the command normally
   } catch (error) {
     console.error(error);
     message.reply('There was an error executing that command!');
