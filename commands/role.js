@@ -86,4 +86,8 @@ module.exports = {
     // Check if the member has any of the roles listed in rolesForChangeRole
     return rolesForChangeRole.some(roleID => member.roles.cache.has(roleID));
   }
+
+// Log a message to indicate that the help.js file has been read
+console.log("role.js started");
+
   
