@@ -1,5 +1,5 @@
 // Import SQLite database connection
-const db = require('warns_bans.db'); // Adjust the path as needed
+const db = require('/home/bot/warns_bans.db'); // Adjust the path as needed
 
 module.exports = {
   name: 'warn',
