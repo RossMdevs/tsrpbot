@@ -38,7 +38,7 @@ client.on('messageCreate', async (message) => {
   const command = client.commands.get(commandName);
 
   try {
-    command.execute(message, args);
+    await command.execute(message, args);
   } catch (error) {
     console.error(error);
     message.reply('There was an error executing that command!');
