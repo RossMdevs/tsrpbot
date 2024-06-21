@@ -39,7 +39,7 @@ client.on('messageCreate', async message => {
     ○ **!add username password** - Adds a user to IRS automatically. (Authorized Users Only)
     ○ **!request <details>** - Streamlines a request to the Board of Directors (Staff+)
     ○ **!report <details>** - Report an issue or user (Anyone can use this command)
-    ○ **!changerole add/remove @user @role** - Add or remove roles for a user (Authorized Role Only)
+    ○ **!changerole add/remove <user_id/user_mention> @role** - Add or remove roles for a user (Authorized Role Only)
     ○ **!help** - Display this help message.`);
     return;
   }
@@ -105,17 +105,36 @@ async function handleChangeRoleCommand(message, args) {
   }
 
   // Ensure the command has the right format
-  if (args.length !== 3 || !['add', 'remove'].includes(args[0].toLowerCase())) {
-    message.reply('**No!** This command requires three arguments: ``add/remove @user @role``.');
+  if (args.length < 2 || !['add', 'remove'].includes(args[0].toLowerCase())) {
+    message.reply('**No!** This command requires at least two arguments: ``add/remove <user_id/user_mention> @role``.');
     return;
   }
 
   const action = args[0].toLowerCase(); // add or remove
-  const user = message.mentions.members.first(); // Mentioned user
-  const role = message.mentions.roles.first(); // Mentioned role
+  let userId = args[1]; // User ID or mention
+  const roleName = args.slice(2).join(' ').toLowerCase(); // Role name to search for
 
-  if (!user || !role) {
-    message.reply('**No!** Please mention a valid user and role.');
+  // Check if the userId is a mention (strip off the "<@!>" if present)
+  if (userId.startsWith('<@') && userId.endsWith('>')) {
+    userId = userId.slice(3, -1); // Remove "<@!>" or "<@" and ">"
+    if (userId.startsWith('!')) {
+      userId = userId.slice(1); // Remove "!" if present
+    }
+  }
+
+  // Find the user by ID in the guild
+  const user = message.guild.members.cache.get(userId);
+
+  if (!user) {
+    message.reply(`**No!** User with ID ${userId} not found.`);
+    return;
+  }
+
+  // Find the role in the guild by name
+  const role = message.guild.roles.cache.find(role => role.name.toLowerCase() === roleName);
+
+  if (!role) {
+    message.reply(`**No!** Role "${roleName}" not found.`);
     return;
   }
 
