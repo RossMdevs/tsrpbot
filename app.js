@@ -189,7 +189,7 @@ client.on('messageCreate', async message => {
     // Check if the author has any of the moderation permissions
     const member = message.guild.members.cache.get(message.author.id);
     if (!member.roles.cache.some(role => moderationPerms.includes(role.id))) {
-      console.log(`Unauthorized user attempted !timeout command: ${message.author
+      console.log(`Unauthorized user attempted !timeout command: ${message.author`);
 // Check if the command is "!timeout"
 if (command === '!timeout') {
   // Check if the author has any of the moderation permissions
