@@ -14,10 +14,10 @@ const client = new Client({
 const allowedUserIds = ['760626163147341844'];
 
 // Define the allowed roles (role IDs) that can use !request command
-const allowedRoles = ['1176929445441982465'];
+const allowedRoles = ['RoleID1', 'RoleID2'];
 
 // Define the channel ID where requests will be posted
-const requestChannelId = '1253717988675424296';
+const requestChannelId = 'ChannelID';
 
 client.once('ready', () => {
   console.log('Bot is ready.');
@@ -26,17 +26,26 @@ client.once('ready', () => {
 client.on('messageCreate', async message => {
   if (message.author.bot) return; // Ignore messages from bots
 
+  // Split the message content into command and arguments
+  const [command, ...args] = message.content.trim().split(/\s+/);
+
+  // Check if the command is "!help"
+  if (command === '!help') {
+    message.reply(`Available commands:
+    1. **!add username password** - Adds a new user. (Only authorized users can use this command)
+    2. **!request <details>** - Submit a request. (Only users with specific roles can use this command)
+    3. **!help** - Display this help message.`);
+    return;
+  }
+
   // Check if the message author's ID is in the allowed list
   if (!allowedUserIds.includes(message.author.id)) {
-    if (message.content.startsWith('!add') || message.content.startsWith('!request')) {
+    if (command === '!add' || command === '!request') {
       console.log(`AEDENIED: ${message.author.tag} (${message.author.id})`);
       message.reply('**No!**: You are not granted to access this command. This action will be logged.');
     }
     return; // Ignore messages from unauthorized users for non-commands
   }
-
-  // Split the message content into command and arguments
-  const [command, ...args] = message.content.trim().split(/\s+/);
 
   // Check if the command is "!add"
   if (command === '!add') {
@@ -81,7 +90,7 @@ client.on('messageCreate', async message => {
 
     // Ensure the request has content
     if (args.length === 0) {
-      message.reply('**Improperly Formatted**: Please follow this format ``!request then what you need access to``.');
+      message.reply('**No!** Please provide your request after the command.');
       return;
     }
 
@@ -96,10 +105,8 @@ client.on('messageCreate', async message => {
     }
 
     // Send the request to the request channel
-    requestChannel.send(`Request from ${message.author.tag} (${message.author.id}): **${requestContent}**`);
+    requestChannel.send(`Request from ${message.author.tag} (${message.author.id}): ${requestContent}`);
     message.reply('Your request has been submitted.');
-    await message.delete(); // Delete the command message after replying
-
   }
 });
 
