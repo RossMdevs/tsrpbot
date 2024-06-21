@@ -1,6 +1,4 @@
 // commands/vip.js
-
-const { allowedRoles } = require('../config.json'); // Replace with actual allowed role IDs
 const Discord = require('discord.js');
 
 module.exports = {
