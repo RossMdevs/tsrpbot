@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const db = require('./database'); // Import SQLite database module
 require('dotenv').config();
 
 const client = new Client({
@@ -36,7 +37,8 @@ client.on('messageCreate', async (message) => {
   const command = client.commands.get(commandName);
 
   try {
-    await command.execute(message, args); // Execute the command based on commandName
+    // Pass db to commands that need database access
+    await command.execute(message, args, db); // Execute the command with database
   } catch (error) {
     console.error(error);
     message.reply('There was an error executing that command!');
