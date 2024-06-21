@@ -39,7 +39,7 @@ client.on('messageCreate', async message => {
     ○ **!add username password** - Adds a user to IRS automatically. (Authorized Users Only)
     ○ **!request <details>** - Streamlines a request to the Board of Directors (Staff+)
     ○ **!report <details>** - Report an issue or user (Anyone can use this command)
-    ○ **!changerole add/remove <user_id/user_mention> @role** - Add or remove roles for a user (Authorized Role Only)
+    ○ **!role add/remove <user_id/user_mention> @role** - Add or remove roles for a user (Authorized Role Only)
     ○ **!help** - Display this help message.`);
     return;
   }
@@ -59,7 +59,7 @@ client.on('messageCreate', async message => {
   }
 
   // Handle !changerole command
-  if (command === '!changerole') {
+  if (command === '!role') {
     handleChangeRoleCommand(message, args);
   }
 });
