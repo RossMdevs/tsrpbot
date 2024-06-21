@@ -106,7 +106,7 @@ async function handleChangeRoleCommand(message, args) {
 
   // Ensure the command has the right format
   if (args.length < 2 || !['add', 'remove'].includes(args[0].toLowerCase())) {
-    message.reply('**No!** This command requires at least two arguments: ``add/remove <user_id/user_mention> @role``.');
+    message.reply('**No!** This command requires at least two arguments: ``add/remove <user_id/user_mention> role_name``.');
     return;
   }
 
@@ -134,18 +134,18 @@ async function handleChangeRoleCommand(message, args) {
   const role = message.guild.roles.cache.find(role => role.name.toLowerCase() === roleName);
 
   if (!role) {
-    message.reply(`**No!** Role "${roleName}" not found.`);
+    message.reply(`**No!** I can't find find "${roleName}".`);
     return;
   }
 
   try {
     if (action === 'add') {
       await user.roles.add(role);
-      message.reply(`Role ${role.name} successfully added to ${user.user.tag}.`);
+      message.reply(`I've added ${role.name} successfully to ${user.user.tag}.`);
       console.log(`Role ${role.name} added to ${user.user.tag} by ${message.author.tag}.`);
     } else if (action === 'remove') {
       await user.roles.remove(role);
-      message.reply(`Role ${role.name} successfully removed from ${user.user.tag}.`);
+      message.reply(`I've removed ${role.name} successfully from ${user.user.tag}.`);
       console.log(`Role ${role.name} removed from ${user.user.tag} by ${message.author.tag}.`);
     }
   } catch (error) {
