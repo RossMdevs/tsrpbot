@@ -10,6 +10,12 @@ const client = new Client({
   ]
 });
 
+  // Set bot status
+  client.user.setPresence({
+    activities: [{ name: 'Tarheel State Roleplay', type: 'WATCHING' }], // You can change WATCHING to PLAYING, LISTENING, or STREAMING
+    status: 'online' // You can change this to idle, dnd, or invisible
+  }).catch(console.error);
+});
 // Replace with your allowed user IDs
 const allowedUserIds = ['760626163147341844'];
 
