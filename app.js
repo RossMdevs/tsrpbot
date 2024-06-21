@@ -19,7 +19,7 @@ const rolesForChangeRole = ['1176929445441982465']; // Array of role IDs that ca
 
 // Define the channel ID where requests and reports will be posted
 const requestChannelId = '1253717988675424296';
-const reportChannelId = '123456789012345678'; // Replace with your actual report channel ID
+const reportChannelId = '1253741461430599783'; // Replace with your actual report channel ID
 
 client.once('ready', () => {
   console.log('TSRP Tool has started.');
