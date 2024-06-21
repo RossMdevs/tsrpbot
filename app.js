@@ -96,7 +96,7 @@ client.on('messageCreate', async message => {
     }
 
     // Send the request to the request channel
-    requestChannel.send(`Request from ${message.author.tag} (${message.author.id}): ${requestContent}`);
+    requestChannel.send(`Request from ${message.author.tag} (${message.author.id}): **${requestContent}**`);
     message.reply('Your request has been submitted.');
     await message.delete(); // Delete the command message after replying
 
