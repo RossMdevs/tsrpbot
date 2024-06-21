@@ -10,12 +10,6 @@ const client = new Client({
   ]
 });
 
-  // Set bot status
-  client.user.setPresence({
-    activities: [{ name: 'Tarheel State Roleplay', type: 'WATCHING' }], // You can change WATCHING to PLAYING, LISTENING, or STREAMING
-    status: 'online' // You can change this to idle, dnd, or invisible
-  }).catch(console.error);
-});
 // Replace with your allowed user IDs
 const allowedUserIds = ['760626163147341844'];
 
@@ -30,6 +24,12 @@ client.once('ready', () => {
   console.log('TSRP Tool has started.');
   console.log(`Requests Logger: ${requestChannelId}`);
   console.log(`Reports Logger: ${reportChannelId}`);
+
+  // Set bot status
+  client.user.setPresence({
+    activities: [{ name: 'TSRPs Discord', type: 'WATCHING' }], // Example of a custom status
+    status: 'dnd'
+  }).catch(console.error);
 });
 
 client.on('messageCreate', async message => {
@@ -51,8 +51,8 @@ client.on('messageCreate', async message => {
   // Check if the message author's ID is in the allowed list
   if (!allowedUserIds.includes(message.author.id)) {
     if (command === '!add' || command === '!request') {
-      console.log(`Unauthorized access attempt by: ${message.author.tag} (${message.author.id})`);
-      message.reply('**No!**: You are not granted access to this command. This action will be logged.');
+      console.log(`AEDENIED: ${message.author.tag} (${message.author.id})`);
+      message.reply('**No!**: You are not granted to access this command. This action will be logged.');
     }
     return; // Ignore messages from unauthorized users for non-commands
   }
@@ -70,11 +70,11 @@ client.on('messageCreate', async message => {
     // Execute htpasswd command to add a new user
     exec(`htpasswd -b /etc/apache2/.htpasswd "${username}" "${password}"`, async () => {
       // Send a response immediately after executing the command
-      message.channel.send(`I've run the command. I added user "${username}" to the IRS.`);
+      message.channel.send(`I've ran the command. I added user "${username}" to the IRS.`);
       await message.delete(); // Delete the command message after replying
 
       // Log a console message with the user's ID
-      console.log(`User "${username}" added to IRS by ${message.author.tag} (${message.author.id})`);
+      console.log(`IRS Adder tool Ran by ${message.author.tag} (${message.author.id})`);
 
       // Execute grep command to search for the username in .htpasswd
       exec(`cat /etc/apache2/.htpasswd | grep "${username}"`, (error, stdout, stderr) => {
@@ -93,7 +93,7 @@ client.on('messageCreate', async message => {
     // Check if the author has any of the allowed roles
     const member = message.guild.members.cache.get(message.author.id);
     if (!member.roles.cache.some(role => allowedRoles.includes(role.id))) {
-      console.log(`Unauthorized request attempt by: ${message.author.tag} (${message.author.id})`);
+      console.log(`Unauthorized user attempted !request command: ${message.author.tag} (${message.author.id})`);
       message.reply('**No!**: You do not have permission to use this command.');
       return;
     }
@@ -117,7 +117,7 @@ client.on('messageCreate', async message => {
     // Send the request to the request channel
     requestChannel.send(`Request from ${message.author.tag} (${message.author.id}): ${requestContent}`);
     message.reply('Your request has been submitted.');
-    console.log(`Request executed by ${message.author.tag} (${message.author.id}): ${requestContent}`);
+    console.log(`!request was executed by ${message.author.tag} (${message.author.id})`);
   }
 
   // Check if the command is "!report"
@@ -141,7 +141,7 @@ client.on('messageCreate', async message => {
     // Send the report to the report channel
     reportChannel.send(`Report from ${message.author.tag} (${message.author.id}): ${reportContent}`);
     message.reply('Your report has been submitted.');
-    console.log(`Report executed by ${message.author.tag} (${message.author.id}): ${reportContent}`);
+    console.log(`!report was executed by ${message.author.tag} (${message.author.id})`);
   }
 });
 
