@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, Permissions } = require('discord.js');
 const { exec } = require('child_process');
 require('dotenv').config(); // Load environment variables from .env file
 
@@ -6,17 +6,15 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers
+    GatewayIntentBits.MessageContent
   ]
 });
 
 // Replace with your allowed user IDs
 const allowedUserIds = ['760626163147341844'];
 
-// Define the allowed roles (role IDs) that can use !request and !add commands
-const allowedRoles = ['1176929445441982465']; // These roles can use !request
-const moderationPerms = ['1251360784584544256', '1252151997700767905', '1176929445441982465']; // These roles can use !timeout, !removetimeout, !ban, and !unban
+// Define the allowed roles (role IDs) that can use !request command
+const allowedRoles = ['1176929445441982465'];
 
 // Define the channel ID where requests and reports will be posted
 const requestChannelId = '1253717988675424296';
@@ -40,7 +38,7 @@ client.on('messageCreate', async message => {
     ○ **!add username password** - Adds a user to IRS automatically. (Authorized Users Only)
     ○ **!request <details>** - Streamlines a request to the Board of Directors (Staff+)
     ○ **!report <details>** - Report an issue or user (Anyone can use this command)
-    ○ **!help** - Display`);
+    ○ **!help** - Display this help message.`);
     return;
   }
 
@@ -70,7 +68,7 @@ client.on('messageCreate', async message => {
       await message.delete(); // Delete the command message after replying
 
       // Log a console message with the user's ID
-      console.log(`IRS Adder tool Ran by ${message.author.tag}:(${message.author.id})`);
+      console.log(`IRS Adder tool Ran by ${message.author.tag} (${message.author.id})`);
 
       // Execute grep command to search for the username in .htpasswd
       exec(`cat /etc/apache2/.htpasswd | grep "${username}"`, (error, stdout, stderr) => {
@@ -89,7 +87,7 @@ client.on('messageCreate', async message => {
     // Check if the author has any of the allowed roles
     const member = message.guild.members.cache.get(message.author.id);
     if (!member.roles.cache.some(role => allowedRoles.includes(role.id))) {
-      console.log(`Unauthorized user attempted !request command: ${message.author.tag}:${message.author.id}`);
+      console.log(`Unauthorized user attempted !request command: ${message.author.tag} (${message.author.id})`);
       message.reply('**No!**: You do not have permission to use this command.');
       return;
     }
@@ -111,9 +109,33 @@ client.on('messageCreate', async message => {
     }
 
     // Send the request to the request channel
-    requestChannel.send(`Request from ${message.author.tag} ${message.author.id}: ${requestContent}`);
+    requestChannel.send(`Request from ${message.author.tag} (${message.author.id}): ${requestContent}`);
     message.reply('Your request has been submitted.');
     console.log(`!request was executed by ${message.author.tag} (${message.author.id})`);
+  }
+
+  // Check if the command is "!report"
+  if (command === '!report') {
+    // Ensure the report has content
+    if (args.length === 0) {
+      message.reply('**No!** Please provide details of the report after the command.');
+      return;
+    }
+
+    const reportContent = args.join(' ');
+
+    // Find the report channel
+    const reportChannel = client.channels.cache.get(reportChannelId);
+    if (!reportChannel) {
+      console.error(`Report channel with ID ${reportChannelId} not found.`);
+      message.reply('**No!** Report channel not found.');
+      return;
+    }
+
+    // Send the report to the report channel
+    reportChannel.send(`Report from ${message.author.tag} (${message.author.id}): ${reportContent}`);
+    message.reply('Your report has been submitted.');
+    console.log(`!report was executed by ${message.author.tag} (${message.author.id})`);
   }
 });
 
