@@ -16,12 +16,14 @@ const allowedUserIds = ['760626163147341844'];
 // Define the allowed roles (role IDs) that can use !request command
 const allowedRoles = ['1176929445441982465'];
 
-// Define the channel ID where requests will be posted
+// Define the channel ID where requests and reports will be posted
 const requestChannelId = '1253717988675424296';
+const reportChannelId = 'ReportChannelID'; // Define the report channel ID
 
 client.once('ready', () => {
   console.log('TSRP Tool has started.');
   console.log(`Requests Logger: ${requestChannelId}`);
+  console.log(`Reports Logger: ${reportChannelId}`);
 });
 
 client.on('messageCreate', async message => {
@@ -34,7 +36,9 @@ client.on('messageCreate', async message => {
   if (command === '!help') {
     message.reply(`Available commands:
     ○ **!add username password** - Adds a user to IRS automatically. (Authorized Users Only)
-    ○ **!request <details>** - Streamlines a request to the Board of Directors (Staff+).`);
+    ○ **!request <details>** - Streamlines a request to the Board of Directors (Staff+)
+    ○ **!report <details>** - Report an issue or user (Anyone can use this command)
+    ○ **!help** - Display this help message.`);
     return;
   }
 
@@ -108,6 +112,30 @@ client.on('messageCreate', async message => {
     requestChannel.send(`Request from ${message.author.tag} (${message.author.id}): ${requestContent}`);
     message.reply('Your request has been submitted.');
     console.log(`!request was executed by ${message.author.tag} (${message.author.id})`);
+  }
+
+  // Check if the command is "!report"
+  if (command === '!report') {
+    // Ensure the report has content
+    if (args.length === 0) {
+      message.reply('**No!** Please provide details of the report after the command.');
+      return;
+    }
+
+    const reportContent = args.join(' ');
+
+    // Find the report channel
+    const reportChannel = client.channels.cache.get(reportChannelId);
+    if (!reportChannel) {
+      console.error(`Report channel with ID ${reportChannelId} not found.`);
+      message.reply('**No!** Report channel not found.');
+      return;
+    }
+
+    // Send the report to the report channel
+    reportChannel.send(`Report from ${message.author.tag} (${message.author.id}): ${reportContent}`);
+    message.reply('Your report has been submitted.');
+    console.log(`!report was executed by ${message.author.tag} (${message.author.id})`);
   }
 });
 
