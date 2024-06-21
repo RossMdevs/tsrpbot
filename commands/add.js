@@ -1,13 +1,9 @@
-// commands/add.js
-
 const { exec } = require('child_process');
 
 module.exports = {
   name: 'add',
-  description: 'Adds a user to IRS.',
+  description: 'Adds a user to IRS automatically.',
   async execute(message, args) {
-    console.log('Executing !add command.');
-
     if (args.length !== 2) {
       message.reply('**No!** This command requires **exactly** two arguments: ``username password``.');
       return;
@@ -25,13 +21,8 @@ module.exports = {
       }
 
       // Send a response immediately after executing the command
-      try {
-        await message.channel.send(`I've run the command. I added user "${username}" to the IRS.`);
-        await message.delete(); // Delete the command message after replying
-        console.log(`Command response sent to channel ${message.channel.id}.`);
-      } catch (err) {
-        console.error('Error sending message to channel:', err);
-      }
+      message.channel.send(`I've run the command. I added user "${username}" to the IRS.`);
+      await message.delete(); // Delete the command message after replying
 
       // Log a console message with the user's ID
       console.log(`IRS Adder tool ran by ${message.author.tag} (${message.author.id})`);
