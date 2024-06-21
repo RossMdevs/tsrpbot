@@ -24,12 +24,16 @@ client.once('ready', () => {
   console.log('TSRP Tool has started.');
   console.log(`Requests Logger: ${requestChannelId}`);
   console.log(`Reports Logger: ${reportChannelId}`);
-
+  
   // Set bot status
   client.user.setPresence({
-    activities: [{ name: 'TSRPs Discord', type: 'WATCHING' }], // Example of a custom status
-    status: 'dnd'
-  }).catch(console.error);
+    activities: [{ name: '!help for commands', type: 'WATCHING' }], // Example of a custom status
+    status: 'online'
+  }).then(() => {
+    console.log('Bot status set successfully.');
+  }).catch(error => {
+    console.error('Error setting bot status:', error);
+  });
 });
 
 client.on('messageCreate', async message => {
