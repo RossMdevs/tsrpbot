@@ -20,4 +20,4 @@ module.exports = {
 };
 
 // Log a message to indicate that the help.js file has been read
-console.log("help.js file has been read and initialized.");
+console.log("help.js started");
