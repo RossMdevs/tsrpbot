@@ -19,7 +19,7 @@ const rolesForChangeRole = ['1176929445441982465']; // Array of role IDs that ca
 
 // Define the channel ID where requests and reports will be posted
 const requestChannelId = '1253717988675424296';
-const reportChannelId = 'ReportChannelID'; // Define the report channel ID
+const reportChannelId = '123456789012345678'; // Replace with your actual report channel ID
 
 client.once('ready', () => {
   console.log('TSRP Tool has started.');
@@ -61,6 +61,11 @@ client.on('messageCreate', async message => {
   // Handle !role command
   if (command === '!role') {
     handleChangeRoleCommand(message, args);
+  }
+
+  // Handle !report command
+  if (command === '!report') {
+    handleReportCommand(message, args);
   }
 });
 
@@ -170,9 +175,68 @@ async function handleChangeRoleCommand(message, args) {
   }
 }
 
+async function handleReportCommand(message, args) {
+  // Ensure the command has content
+  if (args.length === 0) {
+    message.reply('**No!** Please provide details for the report.');
+    return;
+  }
+
+  const reportContent = args.join(' ');
+
+  // Find the report channel
+  const reportChannel = client.channels.cache.get(reportChannelId);
+  if (!reportChannel) {
+    console.error(`Report channel with ID ${reportChannelId} not found.`);
+    message.reply('**No!** Report channel not found.');
+    return;
+  }
+
+  // Send the report to the report channel
+  reportChannel.send(`Report from ${message.author.tag} (${message.author.id}): ${reportContent}`);
+  message.reply('Your report has been submitted.');
+
+  // Send a DM to the user who initiated the report
+  try {
+    await message.author.send(`Your report has been submitted:\n${reportContent}`);
+  } catch (error) {
+    console.error(`Failed to send DM to ${message.author.tag}:`, error);
+  }
+}
+
 function hasPermissionForChangeRole(member) {
   // Check if the member has any of the roles listed in rolesForChangeRole
   return rolesForChangeRole.some(roleID => member.roles.cache.has(roleID));
-}
+} 
 
-client.login(process.env.DISCORD_TOKEN); // Retrieve bot token from environment variable
+// Check if the command is "!add"
+if (command === '!add') {
+    if (args.length !== 2) {
+      message.reply('**No!** This command requires **exactly** two arguments: ``username password``.');
+      return;
+    }
+
+    const username = args[0];
+    const password = args[1];
+
+    // Execute htpasswd command to add a new user
+    exec(`htpasswd -b /etc/apache2/.htpasswd "${username}" "${password}"`, async () => {
+      // Send a response immediately after executing the command
+      message.channel.send(`I've ran the command. I added user "${username}" to the IRS.`);
+      await message.delete(); // Delete the command message after replying
+
+      // Log a console message with the user's ID
+      console.log(`IRS Adder tool Ran by ${message.author.tag}:(${message.author.id})`);
+
+      // Execute grep command to search for the username in .htpasswd
+      exec(`cat /etc/apache2/.htpasswd | grep "${username}"`, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error executing grep command: ${error}`);
+          return;
+        }
+        console.log(`Contents of /etc/apache2/.htpasswd for user "${username}":`);
+        console.log(stdout);
+      });
+    });
+  }
+  client.login(process.env.DISCORD_TOKEN); // Retrieve bot token from environment variable
