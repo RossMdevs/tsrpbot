@@ -79,9 +79,8 @@ client.on('messageCreate', async message => {
     pendingAddRequests.set(token, { username, password });
 
     // Send request received confirmation to the channel where the command was executed
-    message.channel.send(`Request to add user "${username}" by ${message.author.tag} has been received and is pending Board of Directors review.`)
+    message.reply(`Request to add user "${username}" by ${message.author.tag} has been received and is pending Board of Directors review.`)
       .then(() => {
-        message.reply('Your request has been submitted for approval.');
         console.log(`Add request by ${message.author.tag} (${message.author.id}) for user "${username}" has been logged.`);
         message.delete(); // Delete the command message after logging the request
       })
