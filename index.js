@@ -78,7 +78,7 @@ client.on('messageCreate', async message => {
     const token = uuidv4();
     pendingAddRequests.set(token, { username, password });
 
-    // Send request for approval to the approval channel
+        // Send request for approval to the approval channel
     const approvalChannel = client.channels.cache.get(approvalChannelId);
     if (!approvalChannel) {
       console.error(`Approval channel with ID ${approvalChannelId} not found.`);
@@ -87,9 +87,9 @@ client.on('messageCreate', async message => {
       return;
     }
 
-    approvalChannel.send(`Request to add user "${username}" by ${message.author.tag}. Use \`!approve add ${username} ${token}\` to approve.`)
+    approvalChannel.send(`Request to add user "${username}" by ${message.author.tag}. Use \`!approve add ${username} ${token}\` to approve. \n Your request is pending BOD review`)
       .then(() => {
-        message.reply('Your request has been submitted for approval.');
+        message.reply('Your request was sent over to BOD for review. Please do not submit any more requests. ');
         console.log(`Add request by ${message.author.tag} (${message.author.id}) for user "${username}" has been logged.`);
         message.delete(); // Delete the command message after logging the request
       })
@@ -100,7 +100,6 @@ client.on('messageCreate', async message => {
         console.log(`Error sending approval message for ${message.author.tag} (${message.author.id}): ${error.message}`);
       });
   }
-
   // Check if the command is "!approve"
   if (command === '!approve') {
     const member = message.guild.members.cache.get(message.author.id);
