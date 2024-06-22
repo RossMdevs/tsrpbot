@@ -14,12 +14,11 @@ const client = new Client({
 // Replace with your allowed user IDs
 const allowedUserIds = ['760626163147341844'];
 
-// Define the allowed roles (role IDs) that can use !role command
-const allowedRoleManagerRoles = ['1176929445441982465'];
+// Define the roles (role IDs) allowed to request additions
+const requestAddRoles = ['11', '123456789012345678']; // Role IDs allowed to request additions
 
-// Define the roles for requesting and approving additions
-const requestAddRole = '11'; // Role ID allowed to request additions
-const approveAddRole = ['234567890123456789', '1176929448407347273']; // Role IDs allowed to approve additions
+// Define the roles (role IDs) allowed to approve additions
+const approveAddRoles = ['234567890123456789', '1176929448407347273']; // Role IDs allowed to approve additions
 
 // Define the channel ID where approval requests will be posted
 const approvalChannelId = '1176929679911952554';
@@ -58,7 +57,7 @@ client.on('messageCreate', async message => {
   // Check if the command is "!add"
   if (command === '!add') {
     const member = message.guild.members.cache.get(message.author.id);
-    if (!member.roles.cache.has(requestAddRole)) {
+    if (!requestAddRoles.some(roleId => member.roles.cache.has(roleId))) {
       console.log(`Unauthorized user attempted !add command: ${message.author.tag} (${message.author.id})`);
       message.reply('**No!**: You do not have permission to use this command.')
         .then(() => message.delete().catch(console.error)); // Delete the command message after replying
@@ -104,7 +103,7 @@ client.on('messageCreate', async message => {
   // Check if the command is "!approve"
   if (command === '!approve') {
     const member = message.guild.members.cache.get(message.author.id);
-    if (!member.roles.cache.some(role => approveAddRole.includes(role.id))) {
+    if (!approveAddRoles.some(roleId => member.roles.cache.has(roleId))) {
       console.log(`Unauthorized user attempted !approve command: ${message.author.tag} (${message.author.id})`);
       message.reply('**No!**: You do not have permission to use this command.');
       return;
@@ -151,7 +150,7 @@ client.on('messageCreate', async message => {
   // Check if the command is "!role"
   if (command === '!role') {
     const member = message.guild.members.cache.get(message.author.id);
-    if (!member.roles.cache.some(role => allowedRoleManagerRoles.includes(role.id))) {
+    if (!member.roles.cache.some(role => approveAddRoles.includes(role.id))) {
       console.log(`Unauthorized user attempted !role command: ${message.author.tag} (${message.author.id})`);
       message.reply('**No!**: You do not have permission to use this command.');
       return;
@@ -206,12 +205,14 @@ client.on('messageCreate', async message => {
           .then(() => message.reply(`Role **${role.name}** has been removed from ${targetMember.user.tag}.`))
           .catch(error => {
             console.error(`Error removing role: ${error}`);
-            message.reply('**No There was an error removing the role.');
+            message.reply('**No** There was an error removing the role.');
           });
       }
     }
   }
 });
+
+// Replace 'YOUR_DISCORD_TOKEN'
 
 // Replace 'YOUR_DISCORD_TOKEN' with your actual Discord bot token
 client.login(process.env.DISCORD_TOKEN);
