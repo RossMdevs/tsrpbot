@@ -55,15 +55,15 @@ client.on('messageCreate', async message => {
     return; // Ignore messages from unauthorized users for non-commands
   }
 
-    // Check if the command is "!add"
-  if (command === '!add') {
-    const member = message.guild.members.cache.get(message.author.id);
-    if (!requestAddRoles.some(roleId => member.roles.cache.has(roleId))) {
-      console.log(`Unauthorized user attempted !add command: ${message.author.tag} (${message.author.id})`);
-      message.reply('**No!**: You do not have permission to use this command.')
-        .then(() => message.delete().catch(console.error)); // Delete the command message after replying
-      return; // Exit if user doesn't have permission
-    }
+ 
+  // Check permissions to execute !add command
+if (!requestAddRoles.some(roleId => member.roles.cache.has(roleId))) {
+  console.log(`Unauthorized user attempted !add command: ${message.author.tag} (${message.author.id})`);
+  message.reply('**No!**: You do not have permission to use this command.')
+    .then(() => message.delete().catch(console.error)); // Delete the command message after replying
+  return; // Exit if user doesn't have permission
+}
+
 
     if (args.length !== 2) {
       message.reply('**No!** This command requires **exactly** two arguments: `username password`.')
