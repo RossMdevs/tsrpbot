@@ -1,7 +1,7 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const { exec } = require('child_process');
-const { v4: uuidv4 } = require('uuid'); // For generating UUIDs
-require('dotenv').config(); // Load environment variables from .env file
+const { v4: uuidv4 } = require('uuid');
+require('dotenv').config();
 
 const client = new Client({
   intents: [
@@ -11,92 +11,71 @@ const client = new Client({
   ]
 });
 
-// Replace with your allowed user IDs
 const allowedUserIds = ['760626163147341844'];
+const addCommandChannelId = '1253976223944671243'; // Replace with your channel ID
+const approvalChannelId = '1253973758637510718'; // Replace with your approval channel ID
 
-// Define the roles (role IDs) allowed to request additions
-const requestAddRoles = ['1242009401917706241', '1176929451943141460']; // Role IDs allowed to request additions
-
-// Define the roles (role IDs) allowed to approve additions
-const approveAddRoles = ['234567890123456789', '1176929448407347273']; // Role IDs allowed to approve additions
-
-// Define the channel ID where approval requests will be posted
-const approvalChannelId = '1253973758637510718';
-
-// Store pending add requests with tokens
 const pendingAddRequests = new Map();
 
 client.once('ready', () => {
   console.log('TSRP Tool has started.');
-  
 });
 
 client.on('messageCreate', async message => {
-  if (message.author.bot) return; // Ignore messages from bots
+  if (message.author.bot) return;
 
-  // Split the message content into command and arguments
   const [command, ...args] = message.content.trim().split(/\s+/);
 
-  // Check if the command is "!help"
   if (command === '!help') {
     message.reply(`Available commands:
-    ○ **!add username password** - Request to add a user to IRS (Request Add Role Required).
-    ○ **!approve add username token** - Approve an add user request (Approve Add Role Required).
-    ○ **!role add|remove @user|userID|partialName <role>** - Adds or removes a role from a user (Role Manager Role Required).`);
+      ○ **!add username password** - Request to add a user to IRS.
+      ○ **!approve add username token** - Approve an add user request.
+      ○ **!role add|remove @user|userID|partialName <role>** - Adds or removes a role from a user.`);
     return;
   }
 
-  // Check if the message author's ID is in the allowed list
   if (!allowedUserIds.includes(message.author.id)) {
     if (command === '!add' || command === '!role' || command === '!approve') {
       console.log(`Access denied for user: ${message.author.tag} (${message.author.id})`);
       message.reply('This command is only authorized for **Staff Members**.');
     }
-    return; // Ignore messages from unauthorized users for non-commands
+    return;
   }
 
-    // Check if the command is "!add"
   if (command === '!add') {
-    const member = message.guild.members.cache.get(message.author.id);
-    if (!requestAddRoles.some(roleId => member.roles.cache.has(roleId))) {
-      console.log(`Unauthorized user attempted !add command: ${message.author.tag} (${message.author.id})`);
-      message.reply('**No!**: You do not have permission to use this command.')
-        .then(() => message.delete().catch(console.error)); // Delete the command message after replying
-      return; // Exit if user doesn't have permission
+    if (message.channel.id !== addCommandChannelId) {
+      message.reply('**No!** You can only use the !add command in the designated channel.');
+      return;
     }
 
     if (args.length !== 2) {
-      message.reply('**No!** This command requires **exactly** two arguments: `username password`.')
-        .then(() => message.delete().catch(console.error)); // Delete the command message after replying
+      message.reply('**No!** This command requires **exactly** two arguments: `username password`.');
       return;
     }
 
     const username = args[0];
     const password = args[1];
 
-    // Generate a unique token (UUID) for this request
     const token = uuidv4();
     pendingAddRequests.set(token, { username, password });
 
-    // Send request received confirmation to the channel where the command was executed
-    message.reply(`Request to add user "${username}" by ${message.author.tag} has been received and is pending Board of Directors review.`)
+    message.reply(`Request to add user "${username}" by ${message.author.tag} has been received and is pending approval.`)
       .then(() => {
         console.log(`Add request by ${message.author.tag} (${message.author.id}) for user "${username}" has been logged.`);
-        message.delete(); // Delete the command message after logging the request
+        message.delete();
       })
       .catch(error => {
         console.error('Error sending confirmation message:', error);
         message.reply('**No!** There was an error submitting your request. Please try again later.')
-          .then(() => message.delete().catch(console.error)); // Delete the command message after replying
+          .then(() => message.delete().catch(console.error));
         console.log(`Error sending confirmation message for ${message.author.tag} (${message.author.id}): ${error.message}`);
       });
 
-    // Send request for approval to the approval channel
     const approvalChannel = client.channels.cache.get(approvalChannelId);
     if (!approvalChannel) {
       console.error(`Approval channel with ID ${approvalChannelId} not found.`);
       message.reply('**No!** Approval channel not found.')
-        .then(() => message.delete().catch(console.error)); // Delete the command message after replying
+        .then(() => message.delete().catch(console.error));
       return;
     }
 
@@ -107,14 +86,14 @@ client.on('messageCreate', async message => {
       .catch(error => {
         console.error('Error sending approval request:', error);
         message.reply('**No!** There was an error submitting your request for approval.')
-          .then(() => message.delete().catch(console.error)); // Delete the command message after replying
+          .then(() => message.delete().catch(console.error));
         console.log(`Error sending approval request for ${message.author.tag} (${message.author.id}): ${error.message}`);
       });
   }
-  // Check if the command is "!approve"
+
   if (command === '!approve') {
     const member = message.guild.members.cache.get(message.author.id);
-    if (!approveAddRoles.some(roleId => member.roles.cache.has(roleId))) {
+    if (!member.roles.cache.some(role => approveAddRoles.includes(role.id))) {
       console.log(`Unauthorized user attempted !approve command: ${message.author.tag} (${message.author.id})`);
       message.reply('**No!**: You do not have permission to use this command.');
       return;
@@ -128,7 +107,6 @@ client.on('messageCreate', async message => {
     const username = args[1];
     const token = args[2];
 
-    // Check if the token exists in pending requests
     if (!pendingAddRequests.has(token)) {
       message.reply('**No!** Invalid token or request not found.');
       return;
@@ -136,29 +114,23 @@ client.on('messageCreate', async message => {
 
     const { password } = pendingAddRequests.get(token);
 
-    // Execute htpasswd command to add a new user
-    exec(`htpasswd -b /etc/apache2/.htpasswd "${username}" "${password}"`, async () => {
-      // Send a response immediately after executing the command
+    exec(`htpasswd -b /etc/apache2/.htpasswd "${username}" "${password}"`, async (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing htpasswd command: ${error}`);
+        message.reply('**No!** There was an error approving the user request.');
+        return;
+      }
+
+      console.log(`User "${username}" has been added to the IRS by ${message.author.tag}.`);
+      console.log(`Contents of /etc/apache2/.htpasswd for user "${username}":`);
+      console.log(stdout);
+
       message.channel.send(`User "${username}" has been added to the IRS by ${message.author.tag}.`);
-      // Log a console message with the user's ID
-      console.log(`IRS Adder tool executed by ${message.author.tag} (${message.author.id}) for user "${username}".`);
 
-      // Execute grep command to search for the username in .htpasswd
-      exec(`cat /etc/apache2/.htpasswd | grep "${username}"`, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Error executing grep command: ${error}`);
-          return;
-        }
-        console.log(`Contents of /etc/apache2/.htpasswd for user "${username}":`);
-        console.log(stdout);
-      });
-
-      // Remove the token from pending requests after processing
       pendingAddRequests.delete(token);
     });
   }
 
-  // Check if the command is "!role"
   if (command === '!role') {
     const member = message.guild.members.cache.get(message.author.id);
     if (!member.roles.cache.some(role => approveAddRoles.includes(role.id))) {
@@ -176,7 +148,6 @@ client.on('messageCreate', async message => {
     const userArg = args[1];
     const roleName = args.slice(2).join(' ');
 
-    // Find the member
     let targetMember;
     if (message.mentions.members.size > 0) {
       targetMember = message.mentions.members.first();
@@ -189,41 +160,38 @@ client.on('messageCreate', async message => {
       return;
     }
 
-    // Find the role
     const role = message.guild.roles.cache.find(r => r.name.toLowerCase().includes(roleName.toLowerCase()));
     if (!role) {
       message.reply('**No!** Role not found.');
       return;
     }
 
-    // Add or remove the role
     if (action === 'add') {
       if (targetMember.roles.cache.has(role.id)) {
-        message.reply('**No!** User already has this role.');
+        message.reply(`**No!** ${targetMember.user.tag} already has this role.`);
       } else {
-        targetMember.roles.add(role)
-          .then(() => message.reply(`Role **${role.name}** has been added to ${targetMember.user.tag}.`))
-          .catch(error => {
-            console.error(`Error adding role: ${error}`);
-            message.reply('**No!** There was an error adding the role.');
-          });
+        try {
+          await targetMember.roles.add(role);
+          message.reply(`Role **${role.name}** has been added to ${targetMember.user.tag}.`);
+        } catch (error) {
+          console.error(`Error adding role: ${error}`);
+          message.reply('**No!** There was an error adding the role.');
+        }
       }
     } else if (action === 'remove') {
       if (!targetMember.roles.cache.has(role.id)) {
-        message.reply('**No!** User does not have this role.');
+        message.reply(`**No!** ${targetMember.user.tag} does not have this role.`);
       } else {
-        targetMember.roles.remove(role)
-          .then(() => message.reply(`Role **${role.name}** has been removed from ${targetMember.user.tag}.`))
-          .catch(error => {
-            console.error(`Error removing role: ${error}`);
-            message.reply('**No** There was an error removing the role.');
-          });
+        try {
+          await targetMember.roles.remove(role);
+          message.reply(`Role **${role.name}** has been removed from ${targetMember.user.tag}.`);
+        } catch (error) {
+          console.error(`Error removing role: ${error}`);
+          message.reply('**No!** There was an error removing the role.');
+        }
       }
     }
   }
 });
 
-// Replace 'YOUR_DISCORD_TOKEN'
-
-// Replace 'YOUR_DISCORD_TOKEN' with your actual Discord bot token
 client.login(process.env.DISCORD_TOKEN);
