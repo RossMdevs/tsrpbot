@@ -22,7 +22,7 @@ const requestAddRole = '1242009401917706241'; // Role ID allowed to request addi
 const approveAddRole = ['234567890123456789', '1176929448407347273']; // Role IDs allowed to approve additions
 
 // Define the channel ID where approval requests will be posted
-const approvalChannelId = '1253717988675424296';
+const approvalChannelId = '1176929679911952554';
 
 // Store pending add requests with tokens
 const pendingAddRequests = new Map();
