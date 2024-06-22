@@ -205,13 +205,13 @@ client.on('messageCreate', async message => {
         targetMember.roles.remove(role)
           .then(() => message.reply(`Role **${role.name}** has been removed from ${targetMember.user.tag}.`))
           .catch(error => {
-        console.error(`Error removing role: ${error}`);
-        message.reply('**No!** There was an error removing the role.');
-      });
-  } else {
-    message.reply('**No!** Invalid action. Use `add` or `remove`.');
+            console.error(`Error removing role: ${error}`);
+            message.reply('**No There was an error removing the role.');
+          });
+      }
+    }
   }
-}
 });
 
-client.login(process.env.DISCORD_TOKEN); // Retrieve bot token from environment variable
+// Replace 'YOUR_DISCORD_TOKEN' with your actual Discord bot token
+client.login(process.env.DISCORD_TOKEN);
