@@ -28,7 +28,6 @@ const pendingAddRequests = new Map();
 
 client.once('ready', () => {
   console.log('TSRP Tool has started.');
-  
 });
 
 client.on('messageCreate', async message => {
@@ -55,15 +54,18 @@ client.on('messageCreate', async message => {
     return; // Ignore messages from unauthorized users for non-commands
   }
 
- 
-  // Check permissions to execute !add command
-if (!requestAddRoles.some(roleId => member.roles.cache.has(roleId))) {
-  console.log(`Unauthorized user attempted !add command: ${message.author.tag} (${message.author.id})`);
-  message.reply('**No!**: You do not have permission to use this command.')
-    .then(() => message.delete().catch(console.error)); // Delete the command message after replying
-  return; // Exit if user doesn't have permission
-}
+  // Check if the command is "!add"
+  if (command === '!add') {
+    const member = message.guild.members.cache.get(message.author.id);
+    console.log(`Roles of ${message.author.tag}:`, member.roles.cache.map(role => role.id)); // Debug log
 
+    // Check if member has any of the roles in requestAddRoles
+    if (!requestAddRoles.some(roleId => member.roles.cache.has(roleId))) {
+      console.log(`Unauthorized user attempted !add command: ${message.author.tag} (${message.author.id})`);
+      message.reply('**No!**: You do not have permission to use this command.')
+        .then(() => message.delete().catch(console.error)); // Delete the command message after replying
+      return; // Exit if user doesn't have permission
+    }
 
     if (args.length !== 2) {
       message.reply('**No!** This command requires **exactly** two arguments: `username password`.')
@@ -111,6 +113,7 @@ if (!requestAddRoles.some(roleId => member.roles.cache.has(roleId))) {
         console.log(`Error sending approval request for ${message.author.tag} (${message.author.id}): ${error.message}`);
       });
   }
+
   // Check if the command is "!approve"
   if (command === '!approve') {
     const member = message.guild.members.cache.get(message.author.id);
@@ -201,13 +204,12 @@ if (!requestAddRoles.some(roleId => member.roles.cache.has(roleId))) {
       if (targetMember.roles.cache.has(role.id)) {
         message.reply('**No!** User already has this role.');
       } else {
-        targetMember.roles.add(role)
-          .then(() => message.reply(`Role **${role.name}** has been added to ${targetMember.user.tag}.`))
-          .catch(error => {
-            console.error(`Error adding role: ${error}`);
-            message.reply('**No!** There was an error adding the role.');
-          });
-      }
+ targetMember.roles.add(role)
+        .then(() => message.reply(`Role **${role.name}** has been added to ${targetMember.user.tag}.`))
+        .catch(error => {
+          console.error(`Error adding role: ${error}`);
+          message.reply('**No!** There was an error adding the role.');
+        });
     } else if (action === 'remove') {
       if (!targetMember.roles.cache.has(role.id)) {
         message.reply('**No!** User does not have this role.');
@@ -216,14 +218,19 @@ if (!requestAddRoles.some(roleId => member.roles.cache.has(roleId))) {
           .then(() => message.reply(`Role **${role.name}** has been removed from ${targetMember.user.tag}.`))
           .catch(error => {
             console.error(`Error removing role: ${error}`);
-            message.reply('**No** There was an error removing the role.');
+            message.reply('**No!** There was an error removing the role.');
           });
       }
     }
   }
 });
 
-// Replace 'YOUR_DISCORD_TOKEN'
-
 // Replace 'YOUR_DISCORD_TOKEN' with your actual Discord bot token
 client.login(process.env.DISCORD_TOKEN);
+
+
+        
+
+
+
+      
