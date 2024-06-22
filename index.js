@@ -50,7 +50,7 @@ client.on('messageCreate', async message => {
   if (!allowedUserIds.includes(message.author.id)) {
     if (command === '!add' || command === '!role' || command === '!approve') {
       console.log(`Access denied for user: ${message.author.tag} (${message.author.id})`);
-      message.reply('**No!**: You are not granted access to this command. This action will be logged.');
+      message.reply('This command is only authorized for **Staff Members**.');
     }
     return; // Ignore messages from unauthorized users for non-commands
   }
