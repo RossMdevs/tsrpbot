@@ -13,8 +13,11 @@ const client = new Client({
 // Replace with your allowed user IDs
 const allowedUserIds = ['760626163147341844'];
 
+// Define the allowed roles (role IDs) that can use !role command
+const allowedRoleManagerRoles = ['1176929445441982465'];
+
 client.once('ready', () => {
-  console.log('TSRP Logger Started.');
+  console.log('TSRP Tool has started.');
 });
 
 client.on('messageCreate', async message => {
@@ -27,7 +30,7 @@ client.on('messageCreate', async message => {
   if (command === '!help') {
     message.reply(`Available commands:
     ○ **!add username password** - Adds a user to IRS automatically. (Authorized Users Only)
-    ○ **!role add|remove @user|userID|partialName <role>** - Adds or removes a role from a user.`);
+    ○ **!role add|remove @user|userID|partialName <role>** - Adds or removes a role from a user (Authorized Users Only).`);
     return;
   }
 
@@ -73,6 +76,13 @@ client.on('messageCreate', async message => {
 
   // Check if the command is "!role"
   if (command === '!role') {
+    const member = message.guild.members.cache.get(message.author.id);
+    if (!member.roles.cache.some(role => allowedRoleManagerRoles.includes(role.id))) {
+      console.log(`Unauthorized user attempted !role command: ${message.author.tag} (${message.author.id})`);
+      message.reply('**No!**: You do not have permission to use this command.');
+      return;
+    }
+
     if (args.length < 3) {
       message.reply('**No!** This command requires at least three arguments: `add|remove @user|userID|partialName <role>`.');
       return;
@@ -83,14 +93,14 @@ client.on('messageCreate', async message => {
     const roleName = args.slice(2).join(' ');
 
     // Find the member
-    let member;
+    let targetMember;
     if (message.mentions.members.size > 0) {
-      member = message.mentions.members.first();
+      targetMember = message.mentions.members.first();
     } else {
-      member = message.guild.members.cache.find(m => m.id === userArg || m.user.username.includes(userArg) || (m.nickname && m.nickname.includes(userArg)));
+      targetMember = message.guild.members.cache.find(m => m.id === userArg || m.user.username.includes(userArg) || (m.nickname && m.nickname.includes(userArg)));
     }
 
-    if (!member) {
+    if (!targetMember) {
       message.reply('**No!** User not found.');
       return;
     }
@@ -104,22 +114,22 @@ client.on('messageCreate', async message => {
 
     // Add or remove the role
     if (action === 'add') {
-      if (member.roles.cache.has(role.id)) {
+      if (targetMember.roles.cache.has(role.id)) {
         message.reply('**No!** User already has this role.');
       } else {
-        member.roles.add(role)
-          .then(() => message.reply(`Role **${role.name}** has been added to ${member.user.tag}.`))
+        targetMember.roles.add(role)
+          .then(() => message.reply(`Role **${role.name}** has been added to ${targetMember.user.tag}.`))
           .catch(error => {
             console.error(`Error adding role: ${error}`);
             message.reply('**No!** There was an error adding the role.');
           });
       }
     } else if (action === 'remove') {
-      if (!member.roles.cache.has(role.id)) {
+      if (!targetMember.roles.cache.has(role.id)) {
         message.reply('**No!** User does not have this role.');
       } else {
-        member.roles.remove(role)
-          .then(() => message.reply(`Role **${role.name}** has been removed from ${member.user.tag}.`))
+        targetMember.roles.remove(role)
+          .then(() => message.reply(`Role **${role.name}** has been removed from ${targetMember.user.tag}.`))
           .catch(error => {
             console.error(`Error removing role: ${error}`);
             message.reply('**No!** There was an error removing the role.');
