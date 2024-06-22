@@ -55,7 +55,7 @@ client.on('messageCreate', async message => {
     return; // Ignore messages from unauthorized users for non-commands
   }
 
-   // Check if the command is "!add"
+    // Check if the command is "!add"
   if (command === '!add') {
     const member = message.guild.members.cache.get(message.author.id);
     if (!requestAddRoles.some(roleId => member.roles.cache.has(roleId))) {
@@ -78,21 +78,40 @@ client.on('messageCreate', async message => {
     const token = uuidv4();
     pendingAddRequests.set(token, { username, password });
 
-    // Send request for approval to the same channel where the command was executed
-    message.channel.send(`Request to add user "${username}" by ${message.author.tag} has been submitted for Board of Directors review. Use \`!approve add ${username} ${token}\` to approve.`)
+    // Send request received confirmation to the channel where the command was executed
+    message.channel.send(`Request to add user "${username}" by ${message.author.tag} has been received and is pending Board of Directors review.`)
       .then(() => {
         message.reply('Your request has been submitted for approval.');
         console.log(`Add request by ${message.author.tag} (${message.author.id}) for user "${username}" has been logged.`);
         message.delete(); // Delete the command message after logging the request
       })
       .catch(error => {
-        console.error('Error sending approval message:', error);
+        console.error('Error sending confirmation message:', error);
         message.reply('**No!** There was an error submitting your request. Please try again later.')
           .then(() => message.delete().catch(console.error)); // Delete the command message after replying
-        console.log(`Error sending approval message for ${message.author.tag} (${message.author.id}): ${error.message}`);
+        console.log(`Error sending confirmation message for ${message.author.tag} (${message.author.id}): ${error.message}`);
+      });
+
+    // Send request for approval to the approval channel
+    const approvalChannel = client.channels.cache.get(approvalChannelId);
+    if (!approvalChannel) {
+      console.error(`Approval channel with ID ${approvalChannelId} not found.`);
+      message.reply('**No!** Approval channel not found.')
+        .then(() => message.delete().catch(console.error)); // Delete the command message after replying
+      return;
+    }
+
+    approvalChannel.send(`Request to add user "${username}" by ${message.author.tag}. Use \`!approve add ${username} ${token}\` to approve.`)
+      .then(() => {
+        console.log(`Approval request for user "${username}" sent to approval channel.`);
+      })
+      .catch(error => {
+        console.error('Error sending approval request:', error);
+        message.reply('**No!** There was an error submitting your request for approval.')
+          .then(() => message.delete().catch(console.error)); // Delete the command message after replying
+        console.log(`Error sending approval request for ${message.author.tag} (${message.author.id}): ${error.message}`);
       });
   }
-  
   // Check if the command is "!approve"
   if (command === '!approve') {
     const member = message.guild.members.cache.get(message.author.id);
