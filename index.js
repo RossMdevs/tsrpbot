@@ -61,7 +61,7 @@ client.on('messageCreate', async message => {
     }
 
     if (args.length !== 2) {
-      message.reply('**No!** This command requires **exactly** two arguments: \`username password\`.');
+      message.reply('**No!** This command requires **exactly** two arguments: `username password`.');
       return;
     }
 
@@ -94,7 +94,7 @@ client.on('messageCreate', async message => {
     }
 
     if (args.length !== 3 || args[0] !== 'add') {
-      message.reply('**No!** This command requires the format: \`!approve add username password\`.');
+      message.reply('**No!** This command requires the format: `!approve add username password`.');
       return;
     }
 
@@ -130,7 +130,7 @@ client.on('messageCreate', async message => {
     }
 
     if (args.length < 3) {
-      message.reply('**No!** This command requires at least three arguments: \`add|remove @user|userID|partialName <role>\`.');
+      message.reply('**No!** This command requires at least three arguments: `add|remove @user|userID|partialName <role>`.');
       return;
     }
 
@@ -178,11 +178,11 @@ client.on('messageCreate', async message => {
           .then(() => message.reply(`Role **${role.name}** has been removed from ${targetMember.user.tag}.`))
           .catch(error => {
             console.error(`Error removing role: ${error}`);
-            message.reply('**No!** There was an error removing the role.`);
+            message.reply('**No!** There was an error removing the role.');
           });
       }
     } else {
-      message.reply('**No!** Invalid action. Use \`add\` or \`remove\`.');
+      message.reply('**No!** Invalid action. Use `add` or `remove`.');
     }
   }
 });
