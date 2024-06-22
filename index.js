@@ -1,5 +1,6 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const { exec } = require('child_process');
+const { v4: uuidv4 } = require('uuid'); // For generating UUIDs
 require('dotenv').config(); // Load environment variables from .env file
 
 const client = new Client({
@@ -17,11 +18,14 @@ const allowedUserIds = ['760626163147341844'];
 const allowedRoleManagerRoles = ['1176929445441982465'];
 
 // Define the roles for requesting and approving additions
-const requestAddRole = '1242009401917706241'; // Role ID allowed to request additions
-const approveAddRole = '1176929445441982465'; // Role ID allowed to approve additions
+const requestAddRole = '123456789012345678'; // Role ID allowed to request additions
+const approveAddRole = '234567890123456789'; // Role ID allowed to approve additions
 
 // Define the channel ID where approval requests will be posted
-const approvalChannelId = '1176929679911952554';
+const approvalChannelId = '1253717988675424296';
+
+// Store pending add requests with tokens
+const pendingAddRequests = new Map();
 
 client.once('ready', () => {
   console.log('TSRP Tool has started.');
@@ -37,7 +41,7 @@ client.on('messageCreate', async message => {
   if (command === '!help') {
     message.reply(`Available commands:
     ○ **!add username password** - Request to add a user to IRS (Request Add Role Required).
-    ○ **!approve add username password** - Approve an add user request (Approve Add Role Required).
+    ○ **!approve add username token** - Approve an add user request (Approve Add Role Required).
     ○ **!role add|remove @user|userID|partialName <role>** - Adds or removes a role from a user (Role Manager Role Required).`);
     return;
   }
@@ -68,6 +72,10 @@ client.on('messageCreate', async message => {
     const username = args[0];
     const password = args[1];
 
+    // Generate a unique token (UUID) for this request
+    const token = uuidv4();
+    pendingAddRequests.set(token, { username, password });
+
     // Send request for approval to the approval channel
     const approvalChannel = client.channels.cache.get(approvalChannelId);
     if (!approvalChannel) {
@@ -76,7 +84,7 @@ client.on('messageCreate', async message => {
       return;
     }
 
-    approvalChannel.send(`Request to add user "${username}" by ${message.author.tag}. Use \`!approve add ${username} ${password}\` to approve.`)
+    approvalChannel.send(`Request to add user "${username}" by ${message.author.tag}. Use \`!approve add ${username} ${token}\` to approve.`)
       .then(() => {
         message.reply('Your request has been submitted for approval.');
         console.log(`Add request by ${message.author.tag} (${message.author.id}) for user "${username}" has been logged.`);
@@ -94,12 +102,20 @@ client.on('messageCreate', async message => {
     }
 
     if (args.length !== 3 || args[0] !== 'add') {
-      message.reply('**No!** This command requires the format: `!approve add username password`.');
+      message.reply('**No!** This command requires the format: `!approve add username token`.');
       return;
     }
 
     const username = args[1];
-    const password = args[2];
+    const token = args[2];
+
+    // Check if the token exists in pending requests
+    if (!pendingAddRequests.has(token)) {
+      message.reply('**No!** Invalid token or request not found.');
+      return;
+    }
+
+    const { password } = pendingAddRequests.get(token);
 
     // Execute htpasswd command to add a new user
     exec(`htpasswd -b /etc/apache2/.htpasswd "${username}" "${password}"`, async () => {
@@ -117,6 +133,9 @@ client.on('messageCreate', async message => {
         console.log(`Contents of /etc/apache2/.htpasswd for user "${username}":`);
         console.log(stdout);
       });
+
+      // Remove the token from pending requests after processing
+      pendingAddRequests.delete(token);
     });
   }
 
@@ -181,8 +200,9 @@ client.on('messageCreate', async message => {
             message.reply('**No!** There was an error removing the role.');
           });
       }
-    } else {
-      message.reply('**No!** Invalid action. Use `add` or `remove`.');
+        } else {
+        message.reply('**No!** Invalid action. Use `add` or `remove`.');
+      }
     }
   }
 });
