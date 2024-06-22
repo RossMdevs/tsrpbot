@@ -204,7 +204,7 @@ client.on('messageCreate', async message => {
       if (targetMember.roles.cache.has(role.id)) {
         message.reply('**No!** User already has this role.');
       } else {
- targetMember.roles.add(role)
+      targetMember.roles.add(role)
         .then(() => message.reply(`Role **${role.name}** has been added to ${targetMember.user.tag}.`))
         .catch(error => {
           console.error(`Error adding role: ${error}`);
@@ -222,8 +222,14 @@ client.on('messageCreate', async message => {
           });
       }
     }
-  }
-});
+
+
+
+
+
+
+
+
 
 // Replace 'YOUR_DISCORD_TOKEN' with your actual Discord bot token
 client.login(process.env.DISCORD_TOKEN);
