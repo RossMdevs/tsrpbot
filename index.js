@@ -15,19 +15,20 @@ const client = new Client({
 const allowedUserIds = ['760626163147341844'];
 
 // Define the roles (role IDs) allowed to request additions
-const requestAddRoles = ['11', '123456789012345678']; // Role IDs allowed to request additions
+const requestAddRoles = ['1176929451943141460', '1176929451943141460']; // Role IDs allowed to request additions
 
 // Define the roles (role IDs) allowed to approve additions
 const approveAddRoles = ['234567890123456789', '1176929448407347273']; // Role IDs allowed to approve additions
 
 // Define the channel ID where approval requests will be posted
-const approvalChannelId = '1176929679911952554';
+const approvalChannelId = '1253973758637510718';
 
 // Store pending add requests with tokens
 const pendingAddRequests = new Map();
 
 client.once('ready', () => {
   console.log('TSRP Tool has started.');
+  
 });
 
 client.on('messageCreate', async message => {
