@@ -200,7 +200,7 @@ client.on('messageCreate', async message => {
             message.reply('**No!** There was an error removing the role.');
           });
       }
-        } else {
+             } else {
         message.reply('**No!** Invalid action. Use `add` or `remove`.');
       }
     }
