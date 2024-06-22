@@ -13,15 +13,8 @@ const client = new Client({
 // Replace with your allowed user IDs
 const allowedUserIds = ['760626163147341844'];
 
-// Define the allowed roles (role IDs) that can use !request command
-const allowedRoles = ['1176929445441982465'];
-
-// Define the channel ID where requests will be posted
-const requestChannelId = '1253717988675424296';
-
 client.once('ready', () => {
-  console.log('TSRP Tool has started.');
-  console.log("Requests Logger: ${requestChannelId} ");
+  console.log('TSRP Multitool has started properly.');
 });
 
 client.on('messageCreate', async message => {
@@ -33,15 +26,15 @@ client.on('messageCreate', async message => {
   // Check if the command is "!help"
   if (command === '!help') {
     message.reply(`Available commands:
-    ○ **!add username password** - Adds a user to IRS automatically. (Authorized Users Only)
-    ○ **!request <details>** - Streamlines a request to the Board of Directors (Staff+).`);
+    ○ **!add username password** - Adds a user to IRS automatically. (BOD+)
+    ○ **!role add|remove @user|userID|partialName <role>** - Adds or removes a role from a user. (ADMINISTRATION+)`);
     return;
   }
 
   // Check if the message author's ID is in the allowed list
   if (!allowedUserIds.includes(message.author.id)) {
-    if (command === '!add' || command === '!request') {
-      console.log(`AEDENIED: ${message.author.tag} (${message.author.id})`);
+    if (command === '!add' || command === '!role') {
+      console.log(`Access denied for user: ${message.author.tag} (${message.author.id})`);
       message.reply('**No!**: You are not granted to access this command. This action will be logged.');
     }
     return; // Ignore messages from unauthorized users for non-commands
@@ -50,7 +43,7 @@ client.on('messageCreate', async message => {
   // Check if the command is "!add"
   if (command === '!add') {
     if (args.length !== 2) {
-      message.reply('**No!** This command requires **exactly** two arguments: ``username password``.');
+      message.reply('**No!** This command requires **exactly** two arguments: `username password`.');
       return;
     }
 
@@ -64,7 +57,7 @@ client.on('messageCreate', async message => {
       await message.delete(); // Delete the command message after replying
 
       // Log a console message with the user's ID
-      console.log(`IRS Adder tool Ran by ${message.author.tag}:(${message.author.id})`);
+      console.log(`IRS Adder tool executed by ${message.author.tag} (${message.author.id})`);
 
       // Execute grep command to search for the username in .htpasswd
       exec(`cat /etc/apache2/.htpasswd | grep "${username}"`, (error, stdout, stderr) => {
@@ -78,36 +71,63 @@ client.on('messageCreate', async message => {
     });
   }
 
-  // Check if the command is "!request"
-  if (command === '!request') {
-    // Check if the author has any of the allowed roles
-    const member = message.guild.members.cache.get(message.author.id);
-    if (!member.roles.cache.some(role => allowedRoles.includes(role.id))) {
-      console.log(`Unauthorized user attempted !request command: ${message.author.tag}:${message.author.id}`);
-      message.reply('**No!**: You do not have permission to use this command.');
+  // Check if the command is "!role"
+  if (command === '!role') {
+    if (args.length < 3) {
+      message.reply('**No!** This command requires at least three arguments: `add|remove @user|userID|partialName <role>`.');
       return;
     }
 
-    // Ensure the request has content
-    if (args.length === 0) {
-      message.reply('**No!** Please provide your request after the command.');
+    const action = args[0];
+    const userArg = args[1];
+    const roleName = args.slice(2).join(' ');
+
+    // Find the member
+    let member;
+    if (message.mentions.members.size > 0) {
+      member = message.mentions.members.first();
+    } else {
+      member = message.guild.members.cache.find(m => m.id === userArg || m.user.username.includes(userArg));
+    }
+
+    if (!member) {
+      message.reply('**No!** User not found.');
       return;
     }
 
-    const requestContent = args.join(' ');
-
-    // Find the request channel
-    const requestChannel = client.channels.cache.get(requestChannelId);
-    if (!requestChannel) {
-      console.error(`Request channel with ID ${requestChannelId} not found.`);
-      message.reply('**No!** Request channel not found.');
+    // Find the role
+    const role = message.guild.roles.cache.find(r => r.name === roleName);
+    if (!role) {
+      message.reply('**No!** Role not found.');
       return;
     }
 
-    // Send the request to the request channel
-    requestChannel.send(`Request from ${message.author.tag} ${message.author.id}: ${requestContent}`);
-    message.reply('Your request has been submitted.');
-    console.log("!request was executed by ${message.author.tag} ${message.author.id}")
+    // Add or remove the role
+    if (action === 'add') {
+      if (member.roles.cache.has(role.id)) {
+        message.reply('**No!** User already has this role.');
+      } else {
+        member.roles.add(role)
+          .then(() => message.reply(`Role **${role.name}** has been added to ${member.user.tag}.`))
+          .catch(error => {
+            console.error(`Error adding role: ${error}`);
+            message.reply('**No!** There was an error adding the role.');
+          });
+      }
+    } else if (action === 'remove') {
+      if (!member.roles.cache.has(role.id)) {
+        message.reply('**No!** User does not have this role.');
+      } else {
+        member.roles.remove(role)
+          .then(() => message.reply(`Role **${role.name}** has been removed from ${member.user.tag}.`))
+          .catch(error => {
+            console.error(`Error removing role: ${error}`);
+            message.reply('**No!** There was an error removing the role.');
+          });
+      }
+    } else {
+      message.reply('**No!** Invalid action. Use `add` or `remove`.');
+    }
   }
 });
 
