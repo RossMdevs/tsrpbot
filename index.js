@@ -18,7 +18,7 @@ const allowedUserIds = ['760626163147341844'];
 const allowedRoleManagerRoles = ['1176929445441982465'];
 
 // Define the roles for requesting and approving additions
-const requestAddRole = '1242009401917706241'; // Role ID allowed to request additions
+const requestAddRole = '11'; // Role ID allowed to request additions
 const approveAddRole = ['234567890123456789', '1176929448407347273']; // Role IDs allowed to approve additions
 
 // Define the channel ID where approval requests will be posted
