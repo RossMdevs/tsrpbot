@@ -46,19 +46,16 @@ client.on('messageCreate', async message => {
     return;
   }
 
- // Check if the message author's ID is in the allowed list
+  // Check if the message author's ID is in the allowed list
   if (!allowedUserIds.includes(message.author.id)) {
     if (command === '!add' || command === '!role' || command === '!approve') {
-      const member = message.guild.members.cache.get(message.author.id);
-      const userRoles = member.roles.cache.map(role => role.name).join(', '); // Collect role names
-
-      console.log(`Access denied for user: ${message.author.tag} (${message.author.id}). Roles: ${userRoles}`);
+      console.log(`Access denied for user: ${message.author.tag} (${message.author.id})`);
       message.reply('This command is only authorized for **Staff Members**.');
     }
     return; // Ignore messages from unauthorized users for non-commands
   }
 
-  // Check if the command is "!add"
+    // Check if the command is "!add"
   if (command === '!add') {
     const member = message.guild.members.cache.get(message.author.id);
     if (!requestAddRoles.some(roleId => member.roles.cache.has(roleId))) {
@@ -76,6 +73,7 @@ client.on('messageCreate', async message => {
 
     const username = args[0];
     const password = args[1];
+
     // Generate a unique token (UUID) for this request
     const token = uuidv4();
     pendingAddRequests.set(token, { username, password });
