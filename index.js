@@ -18,7 +18,7 @@ const allowedUserIds = ['760626163147341844'];
 const allowedRoleManagerRoles = ['1176929445441982465'];
 
 // Define the roles for requesting and approving additions
-const requestAddRole = '11'; // Role ID allowed to request additions
+const requestAddRole = '1242009401917706241'; // Role ID allowed to request additions
 const approveAddRole = ['234567890123456789', '1176929448407347273']; // Role IDs allowed to approve additions
 
 // Define the channel ID where approval requests will be posted
@@ -60,12 +60,14 @@ client.on('messageCreate', async message => {
     const member = message.guild.members.cache.get(message.author.id);
     if (!member.roles.cache.has(requestAddRole)) {
       console.log(`Unauthorized user attempted !add command: ${message.author.tag} (${message.author.id})`);
-      message.reply('**No!**: You do not have permission to use this command.');
+      message.reply('**No!**: You do not have permission to use this command.')
+        .then(() => message.delete().catch(console.error)); // Delete the command message after replying
       return; // Exit if user doesn't have permission
     }
 
     if (args.length !== 2) {
-      message.reply('**No!** This command requires **exactly** two arguments: `username password`.');
+      message.reply('**No!** This command requires **exactly** two arguments: `username password`.')
+        .then(() => message.delete().catch(console.error)); // Delete the command message after replying
       return;
     }
 
@@ -80,7 +82,8 @@ client.on('messageCreate', async message => {
     const approvalChannel = client.channels.cache.get(approvalChannelId);
     if (!approvalChannel) {
       console.error(`Approval channel with ID ${approvalChannelId} not found.`);
-      message.reply('**No!** Approval channel not found.');
+      message.reply('**No!** Approval channel not found.')
+        .then(() => message.delete().catch(console.error)); // Delete the command message after replying
       return;
     }
 
@@ -92,7 +95,8 @@ client.on('messageCreate', async message => {
       })
       .catch(error => {
         console.error('Error sending approval message:', error);
-        message.reply('**No!** There was an error submitting your request. Please try again later.');
+        message.reply('**No!** There was an error submitting your request. Please try again later.')
+          .then(() => message.delete().catch(console.error)); // Delete the command message after replying
         console.log(`Error sending approval message for ${message.author.tag} (${message.author.id}): ${error.message}`);
       });
   }
@@ -201,14 +205,13 @@ client.on('messageCreate', async message => {
         targetMember.roles.remove(role)
           .then(() => message.reply(`Role **${role.name}** has been removed from ${targetMember.user.tag}.`))
           .catch(error => {
-            console.error(`Error removing role: ${error}`);
-            message.reply('**No!** There was an error removing the role.');
-          });
-      }
-    } else {
-      message.reply('**No!** Invalid action. Use `add` or `remove`.');
-    }
+        console.error(`Error removing role: ${error}`);
+        message.reply('**No!** There was an error removing the role.');
+      });
+  } else {
+    message.reply('**No!** Invalid action. Use `add` or `remove`.');
   }
+}
 });
 
 client.login(process.env.DISCORD_TOKEN); // Retrieve bot token from environment variable
