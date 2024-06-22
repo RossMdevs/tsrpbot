@@ -18,8 +18,8 @@ const allowedUserIds = ['760626163147341844'];
 const allowedRoleManagerRoles = ['1176929445441982465'];
 
 // Define the roles for requesting and approving additions
-const requestAddRole = '123456789012345678'; // Role ID allowed to request additions
-const approveAddRole = '234567890123456789'; // Role ID allowed to approve additions
+const requestAddRole = '1242009401917706241'; // Role ID allowed to request additions
+const approveAddRole = ['234567890123456789'], ['1176929448407347273']; // Role ID allowed to approve additions
 
 // Define the channel ID where approval requests will be posted
 const approvalChannelId = '1253717988675424296';
@@ -200,9 +200,8 @@ client.on('messageCreate', async message => {
             message.reply('**No!** There was an error removing the role.');
           });
       }
-             } else {
-        message.reply('**No!** Invalid action. Use `add` or `remove`.');
-      }
+    } else {
+      message.reply('**No!** Invalid action. Use `add` or `remove`.');
     }
   }
 });
