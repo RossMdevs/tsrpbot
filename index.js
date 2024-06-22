@@ -50,6 +50,8 @@ client.on('messageCreate', async message => {
   if (!allowedUserIds.includes(message.author.id)) {
     if (command === '!add' || command === '!role' || command === '!approve') {
       console.log(`Access denied for user: ${message.author.tag} (${message.author.id})`);
+        const userRoles = member.roles.cache.map(role => role.name).join(', ');
+  console.log(`Access denied for user: ${message.author.tag} (${message.author.id}). Roles: ${userRoles}`);
       message.reply('This command is only authorized for **Staff Members**.');
     }
     return; // Ignore messages from unauthorized users for non-commands
