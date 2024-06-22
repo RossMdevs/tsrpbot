@@ -18,8 +18,8 @@ const allowedUserIds = ['760626163147341844'];
 const allowedRoleManagerRoles = ['1176929445441982465'];
 
 // Define the roles for requesting and approving additions
-const requestAddRole = '1242009401917706241'; // Role ID allowed to request additions
-const approveAddRole = ['234567890123456789'], ['1176929448407347273']; // Role ID allowed to approve additions
+const requestAddRole = '123456789012345678'; // Role ID allowed to request additions
+const approveAddRole = ['234567890123456789', '1176929448407347273']; // Role IDs allowed to approve additions
 
 // Define the channel ID where approval requests will be posted
 const approvalChannelId = '1253717988675424296';
@@ -95,7 +95,7 @@ client.on('messageCreate', async message => {
   // Check if the command is "!approve"
   if (command === '!approve') {
     const member = message.guild.members.cache.get(message.author.id);
-    if (!member.roles.cache.has(approveAddRole)) {
+    if (!member.roles.cache.some(role => approveAddRole.includes(role.id))) {
       console.log(`Unauthorized user attempted !approve command: ${message.author.tag} (${message.author.id})`);
       message.reply('**No!**: You do not have permission to use this command.');
       return;
