@@ -17,11 +17,11 @@ const allowedUserIds = ['760626163147341844'];
 const allowedRoleManagerRoles = ['1176929445441982465'];
 
 // Define the roles for requesting and approving additions
-const requestAddRole = '123456789012345678'; // Role ID allowed to request additions
-const approveAddRole = '234567890123456789'; // Role ID allowed to approve additions
+const requestAddRole = '1242009401917706241'; // Role ID allowed to request additions
+const approveAddRole = '1176929445441982465'; // Role ID allowed to approve additions
 
 // Define the channel ID where approval requests will be posted
-const approvalChannelId = '1253717988675424296';
+const approvalChannelId = '1176929679911952554';
 
 client.once('ready', () => {
   console.log('TSRP Tool has started.');
