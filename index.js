@@ -14,7 +14,7 @@ const client = new Client({
 const allowedUserIds = ['760626163147341844'];
 
 client.once('ready', () => {
-  console.log('TSRP Multitool has started properly.');
+  console.log('TSRP Logger Started.');
 });
 
 client.on('messageCreate', async message => {
@@ -26,8 +26,8 @@ client.on('messageCreate', async message => {
   // Check if the command is "!help"
   if (command === '!help') {
     message.reply(`Available commands:
-    ○ **!add username password** - Adds a user to IRS automatically. (BOD+)
-    ○ **!role add|remove @user|userID|partialName <role>** - Adds or removes a role from a user. (ADMINISTRATION+)`);
+    ○ **!add username password** - Adds a user to IRS automatically. (Authorized Users Only)
+    ○ **!role add|remove @user|userID|partialName <role>** - Adds or removes a role from a user.`);
     return;
   }
 
@@ -87,7 +87,7 @@ client.on('messageCreate', async message => {
     if (message.mentions.members.size > 0) {
       member = message.mentions.members.first();
     } else {
-      member = message.guild.members.cache.find(m => m.id === userArg || m.user.username.includes(userArg));
+      member = message.guild.members.cache.find(m => m.id === userArg || m.user.username.includes(userArg) || (m.nickname && m.nickname.includes(userArg)));
     }
 
     if (!member) {
@@ -96,7 +96,7 @@ client.on('messageCreate', async message => {
     }
 
     // Find the role
-    const role = message.guild.roles.cache.find(r => r.name === roleName);
+    const role = message.guild.roles.cache.find(r => r.name.toLowerCase().includes(roleName.toLowerCase()));
     if (!role) {
       message.reply('**No!** Role not found.');
       return;
