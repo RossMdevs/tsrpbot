@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Permissions } = require('discord.js');
+const { Client, GatewayIntentBits } = require('discord.js');
 const { exec } = require('child_process');
 require('dotenv').config(); // Load environment variables from .env file
 
@@ -46,7 +46,7 @@ client.on('messageCreate', async message => {
   if (!allowedUserIds.includes(message.author.id)) {
     if (command === '!add' || command === '!role' || command === '!approve') {
       console.log(`Access denied for user: ${message.author.tag} (${message.author.id})`);
-      message.reply('**No!**: You are not granted to access this command. This action will be logged.');
+      message.reply('**No!**: You are not granted access to this command. This action will be logged.');
     }
     return; // Ignore messages from unauthorized users for non-commands
   }
@@ -172,7 +172,7 @@ client.on('messageCreate', async message => {
       }
     } else if (action === 'remove') {
       if (!targetMember.roles.cache.has(role.id)) {
-        message.reply('**No!** User does not have this role.`);
+        message.reply('**No!** User does not have this role.');
       } else {
         targetMember.roles.remove(role)
           .then(() => message.reply(`Role **${role.name}** has been removed from ${targetMember.user.tag}.`))
