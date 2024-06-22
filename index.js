@@ -15,7 +15,7 @@ const client = new Client({
 const allowedUserIds = ['760626163147341844'];
 
 // Define the roles (role IDs) allowed to request additions
-const requestAddRoles = ['1176929451943141460', '1176929451943141460']; // Role IDs allowed to request additions
+const requestAddRoles = ['1242009401917706241', '1176929451943141460']; // Role IDs allowed to request additions
 
 // Define the roles (role IDs) allowed to approve additions
 const approveAddRoles = ['234567890123456789', '1176929448407347273']; // Role IDs allowed to approve additions
