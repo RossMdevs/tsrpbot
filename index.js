@@ -18,7 +18,7 @@ const allowedUserIds = ['760626163147341844'];
 const allowedRoleManagerRoles = ['1176929445441982465'];
 
 // Define the roles for requesting and approving additions
-const requestAddRole = '11'; // Role ID allowed to request additions
+const requestAddRole = '1242009401917706241'; // Role ID allowed to request additions
 const approveAddRole = ['234567890123456789', '1176929448407347273']; // Role IDs allowed to approve additions
 
 // Define the channel ID where approval requests will be posted
@@ -42,13 +42,14 @@ client.on('messageCreate', async message => {
     message.reply(`Available commands:
     ○ **!add username password** - Request to add a user to IRS (Request Add Role Required).
     ○ **!approve add username token** - Approve an add user request (Approve Add Role Required).
+    ○ **!deny token** - Deny or reject an add user request (Approve Add Role Required).
     ○ **!role add|remove @user|userID|partialName <role>** - Adds or removes a role from a user (Role Manager Role Required).`);
     return;
   }
 
   // Check if the message author's ID is in the allowed list
   if (!allowedUserIds.includes(message.author.id)) {
-    if (command === '!add' || command === '!role' || command === '!approve') {
+    if (command === '!add' || command === '!role' || command === '!approve' || command === '!deny') {
       console.log(`Access denied for user: ${message.author.tag} (${message.author.id})`);
       message.reply('**No!**: You are not granted access to this command. This action will be logged.');
     }
@@ -87,7 +88,7 @@ client.on('messageCreate', async message => {
       return;
     }
 
-    approvalChannel.send(`Request to add user "${username}" by ${message.author.tag}. Use \`!approve add ${username} ${token}\` to approve.`)
+    approvalChannel.send(`Request to add user "${username}" by ${message.author.tag}. Use \`!approve add ${username} ${token}\` to approve or \`!deny ${token}\` to deny.`)
       .then(() => {
         message.reply('Your request has been submitted for approval.');
         console.log(`Add request by ${message.author.tag} (${message.author.id}) for user "${username}" has been logged.`);
@@ -148,6 +149,34 @@ client.on('messageCreate', async message => {
     });
   }
 
+  // Check if the command is "!deny"
+  if (command === '!deny') {
+    const member = message.guild.members.cache.get(message.author.id);
+    if (!member.roles.cache.some(role => approveAddRole.includes(role.id))) {
+      console.log(`Unauthorized user attempted !deny command: ${message.author.tag} (${message.author.id})`);
+      message.reply('**No!**: You do not have permission to use this command.');
+      return;
+    }
+
+    if (args.length !== 1) {
+      message.reply('**No!** This command requires exactly one argument: `token`.');
+      return;
+    }
+
+    const token = args[0];
+
+    // Check if the token exists in pending requests
+    if (!pendingAddRequests.has(token)) {
+      message.reply('**No!** Invalid token or request not found.');
+      return;
+    }
+
+    // Remove the request from pending requests
+    pendingAddRequests.delete(token);
+    message.reply('The request has been denied and removed from pending requests.')
+      .catch(console.error); // Handle reply error if necessary
+  }
+
   // Check if the command is "!role"
   if (command === '!role') {
     const member = message.guild.members.cache.get(message.author.id);
@@ -173,8 +202,7 @@ client.on('messageCreate', async message => {
     } else {
       targetMember = message.guild.members.cache.find(m => m.id === userArg || m.user.username.includes(userArg) || (m.nickname && m.nickname.includes(userArg)));
     }
-
-    if (!targetMember) {
+if (!targetMember) {
       message.reply('**No!** User not found.');
       return;
     }
@@ -206,12 +234,14 @@ client.on('messageCreate', async message => {
           .then(() => message.reply(`Role **${role.name}** has been removed from ${targetMember.user.tag}.`))
           .catch(error => {
             console.error(`Error removing role: ${error}`);
-            message.reply('**No There was an error removing the role.');
+            message.reply('**No!** There was an error removing the role.');
           });
       }
+    } else {
+      message.reply('**No!** Invalid action. Use `add` or `remove`.');
     }
   }
-});
 
-// Replace 'YOUR_DISCORD_TOKEN' with your actual Discord bot token
-client.login(process.env.DISCORD_TOKEN);
+  // Replace 'YOUR_DISCORD_TOKEN' with your actual Discord bot token
+  client.login(process.env.DISCORD_TOKEN);
+});
