@@ -89,6 +89,11 @@ client.on('messageCreate', async message => {
         message.reply('Your request has been submitted for approval.');
         console.log(`Add request by ${message.author.tag} (${message.author.id}) for user "${username}" has been logged.`);
         message.delete(); // Delete the command message after logging the request
+      })
+      .catch(error => {
+        console.error('Error sending approval message:', error);
+        message.reply('**No!** There was an error submitting your request. Please try again later.');
+        console.log(`Error sending approval message for ${message.author.tag} (${message.author.id}): ${error.message}`);
       });
   }
 
